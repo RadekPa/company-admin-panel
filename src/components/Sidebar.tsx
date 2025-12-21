@@ -42,7 +42,7 @@ export function Sidebar({ collapsed = false }: Props) {
               <Link href="/clients" className={`block px-3 py-2 rounded-md ${pathname.startsWith('/clients') && !pathname.startsWith('/clients/') ? 'active' : 'hover:bg-white/5'}`}>Lista klientów</Link>
               <Link href="/documents" className={`block px-3 py-2 rounded-md ${pathname.startsWith('/documents') ? 'active' : 'hover:bg-white/5'}`}>Dokumenty</Link>
               <Link href="/invoices" className={`block px-3 py-2 rounded-md ${pathname.startsWith('/invoices') ? 'active' : 'hover:bg-white/5'}`}>Faktury - lista</Link>
-              <Link href="/invoices/calendar" className={`block px-3 py-2 rounded-md ${pathname.startsWith('/invoices/calendar') ? 'active' : 'hover:bg-white/5'}`}>Faktury - kalendarz</Link>
+              <Link href="/invoices/calendar" className={`block px-3 py-2 rounded-md hover:bg-white/5`}>Cashflow</Link>
             </div>
           )}
         </div>
