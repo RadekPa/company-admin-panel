@@ -1,12 +1,5 @@
 {
-  "/api/invoices/cashflow/route": "app/api/invoices/cashflow/route.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
   "/api/invoices/route": "app/api/invoices/route.js",
-  "/api/documents/route": "app/api/documents/route.js",
-  "/api/clients/route": "app/api/clients/route.js",
-  "/(protected)/dashboard/page": "app/(protected)/dashboard/page.js",
-  "/(protected)/invoices/calendar/page": "app/(protected)/invoices/calendar/page.js",
-  "/(protected)/invoices/page": "app/(protected)/invoices/page.js",
-  "/(protected)/documents/page": "app/(protected)/documents/page.js",
-  "/(protected)/clients/page": "app/(protected)/clients/page.js"
+  "/(protected)/invoices/page": "app/(protected)/invoices/page.js"
 }
