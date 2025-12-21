@@ -1,0 +1,74 @@
+// Prisma schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator zod {
+  provider = "prisma-zod-generator"
+  output   = "./src/zod"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum DocStatus {
+  DRAFT
+  SIGNED
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String?
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(USER)
+  permissions  Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Client {
+  id        Int        @id @default(autoincrement())
+  name      String
+  email     String?
+  phone     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  documents Document[]
+  invoices  Invoice[]
+}
+
+model Document {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String?
+  status      DocStatus  @default(DRAFT)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  clientId    Int
+  client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id         Int      @id @default(autoincrement())
+  clientId   Int
+  client     Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  title      String
+  issueDate  DateTime
+  paymentDate DateTime
+  net        Float
+  vatPerc    Int
+  vat        Float
+  gross      Float
+  status     String   @default("issued") // 'issued' | 'planned'
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}

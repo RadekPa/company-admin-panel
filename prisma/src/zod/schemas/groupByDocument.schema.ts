@@ -1,0 +1,15 @@
+import type { Prisma } from '@prisma/client';
+import * as z from 'zod';
+import { DocumentWhereInputObjectSchema as DocumentWhereInputObjectSchema } from './objects/DocumentWhereInput.schema';
+import { DocumentOrderByWithAggregationInputObjectSchema as DocumentOrderByWithAggregationInputObjectSchema } from './objects/DocumentOrderByWithAggregationInput.schema';
+import { DocumentScalarWhereWithAggregatesInputObjectSchema as DocumentScalarWhereWithAggregatesInputObjectSchema } from './objects/DocumentScalarWhereWithAggregatesInput.schema';
+import { DocumentScalarFieldEnumSchema } from './enums/DocumentScalarFieldEnum.schema';
+import { DocumentCountAggregateInputObjectSchema as DocumentCountAggregateInputObjectSchema } from './objects/DocumentCountAggregateInput.schema';
+import { DocumentMinAggregateInputObjectSchema as DocumentMinAggregateInputObjectSchema } from './objects/DocumentMinAggregateInput.schema';
+import { DocumentMaxAggregateInputObjectSchema as DocumentMaxAggregateInputObjectSchema } from './objects/DocumentMaxAggregateInput.schema';
+import { DocumentAvgAggregateInputObjectSchema as DocumentAvgAggregateInputObjectSchema } from './objects/DocumentAvgAggregateInput.schema';
+import { DocumentSumAggregateInputObjectSchema as DocumentSumAggregateInputObjectSchema } from './objects/DocumentSumAggregateInput.schema';
+
+export const DocumentGroupBySchema: z.ZodType<Prisma.DocumentGroupByArgs> = z.object({ where: DocumentWhereInputObjectSchema.optional(), orderBy: z.union([DocumentOrderByWithAggregationInputObjectSchema, DocumentOrderByWithAggregationInputObjectSchema.array()]).optional(), having: DocumentScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(DocumentScalarFieldEnumSchema), _count: z.union([ z.literal(true), DocumentCountAggregateInputObjectSchema ]).optional(), _min: DocumentMinAggregateInputObjectSchema.optional(), _max: DocumentMaxAggregateInputObjectSchema.optional(), _avg: DocumentAvgAggregateInputObjectSchema.optional(), _sum: DocumentSumAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.DocumentGroupByArgs>;
+
+export const DocumentGroupByZodSchema = z.object({ where: DocumentWhereInputObjectSchema.optional(), orderBy: z.union([DocumentOrderByWithAggregationInputObjectSchema, DocumentOrderByWithAggregationInputObjectSchema.array()]).optional(), having: DocumentScalarWhereWithAggregatesInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), by: z.array(DocumentScalarFieldEnumSchema), _count: z.union([ z.literal(true), DocumentCountAggregateInputObjectSchema ]).optional(), _min: DocumentMinAggregateInputObjectSchema.optional(), _max: DocumentMaxAggregateInputObjectSchema.optional(), _avg: DocumentAvgAggregateInputObjectSchema.optional(), _sum: DocumentSumAggregateInputObjectSchema.optional() }).strict();

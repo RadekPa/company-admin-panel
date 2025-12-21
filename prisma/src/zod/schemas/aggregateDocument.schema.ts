@@ -1,0 +1,14 @@
+import type { Prisma } from '@prisma/client';
+import * as z from 'zod';
+import { DocumentOrderByWithRelationInputObjectSchema as DocumentOrderByWithRelationInputObjectSchema } from './objects/DocumentOrderByWithRelationInput.schema';
+import { DocumentWhereInputObjectSchema as DocumentWhereInputObjectSchema } from './objects/DocumentWhereInput.schema';
+import { DocumentWhereUniqueInputObjectSchema as DocumentWhereUniqueInputObjectSchema } from './objects/DocumentWhereUniqueInput.schema';
+import { DocumentCountAggregateInputObjectSchema as DocumentCountAggregateInputObjectSchema } from './objects/DocumentCountAggregateInput.schema';
+import { DocumentMinAggregateInputObjectSchema as DocumentMinAggregateInputObjectSchema } from './objects/DocumentMinAggregateInput.schema';
+import { DocumentMaxAggregateInputObjectSchema as DocumentMaxAggregateInputObjectSchema } from './objects/DocumentMaxAggregateInput.schema';
+import { DocumentAvgAggregateInputObjectSchema as DocumentAvgAggregateInputObjectSchema } from './objects/DocumentAvgAggregateInput.schema';
+import { DocumentSumAggregateInputObjectSchema as DocumentSumAggregateInputObjectSchema } from './objects/DocumentSumAggregateInput.schema';
+
+export const DocumentAggregateSchema: z.ZodType<Prisma.DocumentAggregateArgs> = z.object({ orderBy: z.union([DocumentOrderByWithRelationInputObjectSchema, DocumentOrderByWithRelationInputObjectSchema.array()]).optional(), where: DocumentWhereInputObjectSchema.optional(), cursor: DocumentWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), _count: z.union([ z.literal(true), DocumentCountAggregateInputObjectSchema ]).optional(), _min: DocumentMinAggregateInputObjectSchema.optional(), _max: DocumentMaxAggregateInputObjectSchema.optional(), _avg: DocumentAvgAggregateInputObjectSchema.optional(), _sum: DocumentSumAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.DocumentAggregateArgs>;
+
+export const DocumentAggregateZodSchema = z.object({ orderBy: z.union([DocumentOrderByWithRelationInputObjectSchema, DocumentOrderByWithRelationInputObjectSchema.array()]).optional(), where: DocumentWhereInputObjectSchema.optional(), cursor: DocumentWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), _count: z.union([ z.literal(true), DocumentCountAggregateInputObjectSchema ]).optional(), _min: DocumentMinAggregateInputObjectSchema.optional(), _max: DocumentMaxAggregateInputObjectSchema.optional(), _avg: DocumentAvgAggregateInputObjectSchema.optional(), _sum: DocumentSumAggregateInputObjectSchema.optional() }).strict();
