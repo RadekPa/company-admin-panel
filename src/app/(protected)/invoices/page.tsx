@@ -1,5 +1,6 @@
 "use client"
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Card } from '../../../components/ui/Card'
 import { Table, Th, Td } from '../../../components/ui/Table'
 import { Pagination } from '../../../components/ui/Pagination'
@@ -44,10 +45,10 @@ export default function InvoicesPage(){
               <tbody>
                 {invoices.map(i=> (
                   <tr key={i.id}>
-                    <Td>{i.id}</Td>
+                    <Td><Link href={`/invoices/${i.id}`}>{i.id}</Link></Td>
                     <Td>{i.clientName}</Td>
                     <Td>{i.status === 'planned' ? 'Planowana' : 'Wystawiona'}</Td>
-                    <Td>{i.title}</Td>
+                    <Td><Link href={`/invoices/${i.id}`}>{i.title}</Link></Td>
                     <Td>{new Intl.DateTimeFormat('pl-PL').format(new Date(i.issueDate))}</Td>
                     <Td>{new Intl.DateTimeFormat('pl-PL').format(new Date(i.paymentDate))}</Td>
                     <Td className="text-right">{i.gross.toFixed(2)}</Td>

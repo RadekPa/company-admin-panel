@@ -1,5 +1,6 @@
-'use client'
+ 'use client'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { Card } from '../../../../components/ui/Card'
 import { Button } from '../../../../components/ui/Button'
@@ -258,10 +259,10 @@ export default function ClientDetailPage() {
             <tbody>
               {invoices.map(inv => (
                 <tr key={inv.id}>
-                  <Td>{inv.id}</Td>
+                  <Td><Link href={`/invoices/${inv.id}`}>{inv.id}</Link></Td>
                   <Td>{new Intl.DateTimeFormat('pl-PL').format(new Date(inv.issueDate))}</Td>
                   <Td>{new Intl.DateTimeFormat('pl-PL').format(new Date(inv.paymentDate))}</Td>
-                  <Td>{inv.title}</Td>
+                  <Td><Link href={`/invoices/${inv.id}`}>{inv.title}</Link></Td>
                   <Td>{inv.net.toFixed(2)}</Td>
                   <Td>{inv.vatPerc}% ({inv.vat.toFixed(2)})</Td>
                   <Td>{inv.gross.toFixed(2)}</Td>
