@@ -41,8 +41,8 @@ export function Sidebar({ collapsed = false }: Props) {
             <div className={`mt-1 pl-6 overflow-hidden transition-all duration-200 ${open.clients ? 'max-h-40' : 'max-h-0'}`}>
               <Link href="/clients" className={`block px-3 py-2 rounded-md ${pathname.startsWith('/clients') && !pathname.startsWith('/clients/') ? 'active' : 'hover:bg-white/5'}`}>Lista klientów</Link>
               <Link href="/documents" className={`block px-3 py-2 rounded-md ${pathname.startsWith('/documents') ? 'active' : 'hover:bg-white/5'}`}>Dokumenty</Link>
-              <Link href="/invoices" className={`block px-3 py-2 rounded-md ${pathname.startsWith('/invoices') ? 'active' : 'hover:bg-white/5'}`}>Faktury - lista</Link>
-              <Link href="/invoices/calendar" className={`block px-3 py-2 rounded-md hover:bg-white/5`}>Cashflow</Link>
+              <Link href="/invoices" className={`block px-3 py-2 rounded-md ${pathname.startsWith('/invoices') && !pathname.startsWith('/invoices/calendar') ? 'active' : 'hover:bg-white/5'}`}>Faktury - lista</Link>
+              <Link href="/invoices/calendar" className={`block px-3 py-2 rounded-md ${pathname.startsWith('/invoices/calendar') ? 'active' : 'hover:bg-white/5'}`}>Cashflow</Link>
             </div>
           )}
         </div>
