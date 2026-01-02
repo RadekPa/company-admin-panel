@@ -90,6 +90,21 @@ async function main() {
   // Bulk insert (use prisma as any until prisma generate is run locally)
   await (prisma as any).invoice.createMany({ data: invoicesData })
 
+  // Seed role permissions
+  const modules = ['dashboard', 'clients', 'documents', 'invoices', 'cashflow', 'administration']
+  for (const module of modules) {
+    await prisma.rolePermissions.upsert({
+      where: { module },
+      update: {},
+      create: {
+        module,
+        userAccess: false,
+        advancedAccess: false,
+        adminAccess: true,
+      }
+    })
+  }
+
   console.log('Seed completed. Admin: admin@example.com / admin123')
 }
 

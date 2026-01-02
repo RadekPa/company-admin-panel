@@ -7,7 +7,7 @@ import { Table, Th, Td } from '../../../components/ui/Table'
 import { Pagination } from '../../../components/ui/Pagination'
 import { UserCreateSchema, UserUpdateSchema } from '../../../validation/user'
 
-type User = { id: number; name?: string | null; email: string; role: 'ADMIN' | 'USER'; createdAt?: string; permissions?: any }
+type User = { id: number; name?: string | null; email: string; role: 'ADMIN' | 'ADVANCED' | 'USER'; createdAt?: string; permissions?: any }
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
@@ -18,6 +18,7 @@ export default function UsersPage() {
   const [meta, setMeta] = useState({ page: 1, pageSize: 10, total: 0, pages: 1 })
 
   const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [showAddModal, setShowAddModal] = useState(false)
 
   const [formErrors, setFormErrors] = useState<string[]>([])
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'USER' })
@@ -46,6 +47,7 @@ export default function UsersPage() {
       return
     }
     setForm({ name: '', email: '', password: '', role: 'USER' })
+    setShowAddModal(false)
     await load(1)
   }
 
@@ -59,7 +61,7 @@ export default function UsersPage() {
     await load(page)
   }
 
-  const updateRole = async (id: number, role: 'ADMIN'|'USER') => {
+  const updateRole = async (id: number, role: 'ADMIN'|'ADVANCED'|'USER') => {
     const res = await fetch(`/api/users/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role }) })
     if (!res.ok) { alert('Brak uprawnień'); return }
     await load(page)
@@ -81,33 +83,9 @@ export default function UsersPage() {
   return (
     <div className="space-y-6">
       <Card>
-        <h1 className="text-xl font-semibold mb-4">Użytkownicy</h1>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="label">Nazwa</label>
-            <Input value={form.name} onChange={e=>setForm(prev=>({ ...prev, name: e.target.value }))} />
-          </div>
-          <div>
-            <label className="label">Email</label>
-            <Input value={form.email} onChange={e=>setForm(prev=>({ ...prev, email: e.target.value }))} />
-          </div>
-          <div>
-            <label className="label">Hasło</label>
-            <Input value={form.password} onChange={e=>setForm(prev=>({ ...prev, password: e.target.value }))} />
-          </div>
-          <div>
-            <label className="label">Rola</label>
-            <Select value={form.role} onChange={e=>setForm(prev=>({ ...prev, role: e.target.value }))}>
-              <option value="USER">USER</option>
-              <option value="ADMIN">ADMIN</option>
-            </Select>
-          </div>
-        </div>
-        {formErrors.length>0 && (
-          <ul className="mt-2 list-disc list-inside text-sm text-red-600">{formErrors.map((e,i)=>(<li key={i}>{e}</li>))}</ul>
-        )}
-        <div className="mt-4">
-          <Button variant="primary" onClick={addUser}>Dodaj użytkownika</Button>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl font-semibold">Użytkownicy</h1>
+          <Button variant="primary" onClick={() => { setShowAddModal(true); setFormErrors([]); }}>Dodaj użytkownika</Button>
         </div>
       </Card>
 
@@ -133,6 +111,7 @@ export default function UsersPage() {
                     <Td>
                       <Select value={u.role} onChange={e=>updateRole(u.id, e.target.value as any)}>
                         <option value="USER">USER</option>
+                        <option value="ADVANCED">ADVANCED</option>
                         <option value="ADMIN">ADMIN</option>
                       </Select>
                     </Td>
@@ -161,6 +140,46 @@ export default function UsersPage() {
         )}
       </Card>
 
+      {/* Add user modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded shadow w-full max-w-lg">
+            <h3 className="text-lg font-semibold mb-4">Dodaj użytkownika</h3>
+            <div className="grid grid-cols-1 gap-3">
+              <div>
+                <label className="label">Nazwa</label>
+                <Input value={form.name} onChange={e=>setForm(prev=>({ ...prev, name: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">Email</label>
+                <Input value={form.email} onChange={e=>setForm(prev=>({ ...prev, email: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">Hasło</label>
+                <Input type="password" value={form.password} onChange={e=>setForm(prev=>({ ...prev, password: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">Rola</label>
+                <Select value={form.role} onChange={e=>setForm(prev=>({ ...prev, role: e.target.value }))}>
+                  <option value="USER">USER</option>
+                  <option value="ADVANCED">ADVANCED</option>
+                  <option value="ADMIN">ADMIN</option>
+                </Select>
+              </div>
+            </div>
+            {formErrors.length > 0 && (
+              <ul className="mt-2 list-disc list-inside text-sm text-red-600">
+                {formErrors.map((e, i) => (<li key={i}>{e}</li>))}
+              </ul>
+            )}
+            <div className="mt-4 flex justify-end gap-2">
+              <Button onClick={() => { setShowAddModal(false); setFormErrors([]); }}>Anuluj</Button>
+              <Button variant="primary" onClick={addUser}>Dodaj</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Simple edit modal */}
       {editingUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -174,6 +193,7 @@ export default function UsersPage() {
               <label className="label">Rola</label>
               <Select value={editingUser.role} onChange={e=>setEditingUser(prev=>prev?{ ...prev, role: e.target.value as any }:prev)}>
                 <option value="USER">USER</option>
+                <option value="ADVANCED">ADVANCED</option>
                 <option value="ADMIN">ADMIN</option>
               </Select>
 

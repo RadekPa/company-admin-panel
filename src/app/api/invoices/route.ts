@@ -54,3 +54,39 @@ export async function GET(req: Request) {
   const meta = { page, pageSize, total, pages: Math.max(1, Math.ceil(total / pageSize)) }
   return NextResponse.json({ data: items, meta })
 }
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json()
+    const clientId = Number(body.clientId)
+    if (!clientId) return NextResponse.json({ error: 'clientId required' }, { status: 400 })
+    const issueDate = body.issueDate ? new Date(body.issueDate) : new Date()
+    const paymentDate = body.paymentDate ? new Date(body.paymentDate) : issueDate
+    const title = body.title || ''
+    const net = Number(body.net) || 0
+    const vatPerc = Number(body.vatPerc) || 0
+    const vat = Math.round((net * vatPerc) * 100) / 100 / 100 // temporary adjust - will fix to two decimals after
+    const vatValue = Math.round((net * vatPerc / 100) * 100) / 100
+    const gross = Math.round((net + vatValue) * 100) / 100
+    const status = body.status === 'planned' ? 'planned' : 'issued'
+
+    const p = prisma as any
+    const invoice = await p.invoice.create({
+      data: {
+        clientId,
+        issueDate,
+        paymentDate,
+        title,
+        net,
+        vatPerc,
+        vat: vatValue,
+        gross,
+        status
+      }
+    })
+
+    return NextResponse.json({ id: invoice.id }, { status: 201 })
+  } catch (err: any) {
+    return NextResponse.json({ error: err?.message ?? String(err) }, { status: 500 })
+  }
+}

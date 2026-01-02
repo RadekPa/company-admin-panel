@@ -10,7 +10,23 @@ import { Pagination } from '../../../../components/ui/Pagination'
 import { ClientUpdateSchema } from '../../../../validation/client'
 import { DocumentCreateSchema } from '../../../../validation/document'
 
-type Client = { id: number; name: string; email?: string | null; phone?: string | null }
+type Client = { 
+  id: number
+  name: string
+  email?: string | null
+  phone?: string | null
+  address?: string | null
+  city?: string | null
+  postalCode?: string | null
+  country?: string | null
+  nip?: string | null
+  regon?: string | null
+  legalForm?: string | null
+  bankAccount?: string | null
+  notes?: string | null
+  createdAt: string
+  updatedAt: string
+}
 
 type Document = { id: number; title: string; description?: string | null; status: 'DRAFT' | 'SIGNED'; createdAt: string }
 
@@ -22,6 +38,7 @@ export default function ClientDetailPage() {
   const params = useParams()
   const id = Number(params.id)
   const [client, setClient] = useState<Client | null>(null)
+  const [activeTab, setActiveTab] = useState<'documents' | 'invoices'>('documents')
 
   const [docs, setDocs] = useState<Document[]>([])
   const [meta, setMeta] = useState<Meta>({ page: 1, pageSize: 10, total: 0, pages: 1 })
@@ -35,6 +52,8 @@ export default function ClientDetailPage() {
   const [formClientErrors, setFormClientErrors] = useState<string[]>([])
   const [formDocErrors, setFormDocErrors] = useState<string[]>([])
   const [formDoc, setFormDoc] = useState({ title: '', description: '', status: 'DRAFT' as 'DRAFT'|'SIGNED' })
+  const [editMode, setEditMode] = useState(false)
+  
   // invoices
   const [invoicesType, setInvoicesType] = useState<'issued'|'planned'>('issued')
   const [invoices, setInvoices] = useState<any[]>([])
@@ -102,7 +121,20 @@ export default function ClientDetailPage() {
 
   const updateClient = async () => {
     if (!client) return
-    const parsed = ClientUpdateSchema.safeParse({ name: client.name, email: client.email ?? '', phone: client.phone ?? '' })
+    const parsed = ClientUpdateSchema.safeParse({ 
+      name: client.name, 
+      email: client.email ?? '', 
+      phone: client.phone ?? '',
+      address: client.address ?? '',
+      city: client.city ?? '',
+      postalCode: client.postalCode ?? '',
+      country: client.country ?? '',
+      nip: client.nip ?? '',
+      regon: client.regon ?? '',
+      legalForm: client.legalForm ?? '',
+      bankAccount: client.bankAccount ?? '',
+      notes: client.notes ?? ''
+    })
     if (!parsed.success) {
       setFormClientErrors(parsed.error.errors.map(e=>e.message))
       return
@@ -110,6 +142,7 @@ export default function ClientDetailPage() {
     setFormClientErrors([])
     await fetch(`/api/clients/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(parsed.data) })
     await loadClient()
+    setEditMode(false)
   }
 
   const toggleSort = (col: typeof sortBy) => {
@@ -120,156 +153,359 @@ export default function ClientDetailPage() {
 
   return (
     <div className="space-y-6">
-      <Card className="space-y-3">
-        <h1 className="text-xl font-semibold">Klient: {client.name}</h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="label">Nazwa</label>
-            <Input value={client.name} onChange={e=>setClient({ ...client, name: e.target.value })} />
-          </div>
-          <div>
-            <label className="label">Email</label>
-            <Input value={client.email ?? ''} onChange={e=>setClient({ ...client, email: e.target.value })} />
-          </div>
-          <div>
-            <label className="label">Telefon</label>
-            <Input value={client.phone ?? ''} onChange={e=>setClient({ ...client, phone: e.target.value })} />
+      {/* Client Details Card - Read Only */}
+      <Card>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-semibold">Szczegóły klienta</h1>
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={() => window.history.back()}>
+              Powrót
+            </Button>
+            {!editMode ? (
+              <Button variant="primary" onClick={() => setEditMode(true)}>
+                Edytuj
+              </Button>
+            ) : (
+              <>
+                <Button variant="secondary" onClick={() => { setEditMode(false); loadClient() }}>
+                  Anuluj
+                </Button>
+                <Button variant="primary" onClick={updateClient}>
+                  Zapisz
+                </Button>
+              </>
+            )}
           </div>
         </div>
-        {formClientErrors.length>0 && (
-          <ul className="mt-2 list-disc list-inside text-sm text-red-600">
-            {formClientErrors.map((e,i)=>(<li key={i}>{e}</li>))}
-          </ul>
+
+        {formClientErrors.length > 0 && (
+          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 rounded">
+            <ul className="list-disc list-inside text-sm text-red-600 dark:text-red-400">
+              {formClientErrors.map((e, i) => (<li key={i}>{e}</li>))}
+            </ul>
+          </div>
         )}
-        <Button variant="primary" onClick={updateClient}>Zapisz</Button>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Podstawowe dane */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+              Podstawowe dane
+            </h3>
+            <div>
+              <label className="label text-xs text-gray-500">Nazwa</label>
+              {editMode ? (
+                <Input value={client.name} onChange={e => setClient({ ...client, name: e.target.value })} />
+              ) : (
+                <p className="text-base font-medium">{client.name}</p>
+              )}
+            </div>
+            <div>
+              <label className="label text-xs text-gray-500">Email</label>
+              {editMode ? (
+                <Input value={client.email ?? ''} onChange={e => setClient({ ...client, email: e.target.value })} />
+              ) : (
+                <p className="text-base">{client.email || '-'}</p>
+              )}
+            </div>
+            <div>
+              <label className="label text-xs text-gray-500">Telefon</label>
+              {editMode ? (
+                <Input value={client.phone ?? ''} onChange={e => setClient({ ...client, phone: e.target.value })} />
+              ) : (
+                <p className="text-base">{client.phone || '-'}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Adres */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+              Adres
+            </h3>
+            <div>
+              <label className="label text-xs text-gray-500">Ulica i numer</label>
+              {editMode ? (
+                <Input value={client.address ?? ''} onChange={e => setClient({ ...client, address: e.target.value })} />
+              ) : (
+                <p className="text-base">{client.address || '-'}</p>
+              )}
+            </div>
+            <div>
+              <label className="label text-xs text-gray-500">Miasto</label>
+              {editMode ? (
+                <Input value={client.city ?? ''} onChange={e => setClient({ ...client, city: e.target.value })} />
+              ) : (
+                <p className="text-base">{client.city || '-'}</p>
+              )}
+            </div>
+            <div>
+              <label className="label text-xs text-gray-500">Kod pocztowy</label>
+              {editMode ? (
+                <Input value={client.postalCode ?? ''} onChange={e => setClient({ ...client, postalCode: e.target.value })} />
+              ) : (
+                <p className="text-base">{client.postalCode || '-'}</p>
+              )}
+            </div>
+            <div>
+              <label className="label text-xs text-gray-500">Kraj</label>
+              {editMode ? (
+                <Input value={client.country ?? ''} onChange={e => setClient({ ...client, country: e.target.value })} />
+              ) : (
+                <p className="text-base">{client.country || '-'}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Dane firmowe */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+              Dane firmowe
+            </h3>
+            <div>
+              <label className="label text-xs text-gray-500">NIP</label>
+              {editMode ? (
+                <Input value={client.nip ?? ''} onChange={e => setClient({ ...client, nip: e.target.value })} />
+              ) : (
+                <p className="text-base">{client.nip || '-'}</p>
+              )}
+            </div>
+            <div>
+              <label className="label text-xs text-gray-500">REGON</label>
+              {editMode ? (
+                <Input value={client.regon ?? ''} onChange={e => setClient({ ...client, regon: e.target.value })} />
+              ) : (
+                <p className="text-base">{client.regon || '-'}</p>
+              )}
+            </div>
+            <div>
+              <label className="label text-xs text-gray-500">Forma prawna</label>
+              {editMode ? (
+                <Input value={client.legalForm ?? ''} onChange={e => setClient({ ...client, legalForm: e.target.value })} />
+              ) : (
+                <p className="text-base">{client.legalForm || '-'}</p>
+              )}
+            </div>
+            <div>
+              <label className="label text-xs text-gray-500">Konto bankowe</label>
+              {editMode ? (
+                <Input value={client.bankAccount ?? ''} onChange={e => setClient({ ...client, bankAccount: e.target.value })} />
+              ) : (
+                <p className="text-base font-mono text-sm">{client.bankAccount || '-'}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Notatki - full width */}
+        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div>
+            <label className="label text-xs text-gray-500">Notatki</label>
+            {editMode ? (
+              <textarea 
+                className="input w-full min-h-[80px]" 
+                value={client.notes ?? ''} 
+                onChange={e => setClient({ ...client, notes: e.target.value })}
+              />
+            ) : (
+              <p className="text-base whitespace-pre-wrap">{client.notes || '-'}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Metadata */}
+        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 grid grid-cols-2 gap-4 text-sm text-gray-500">
+          <div>
+            <span className="font-medium">Utworzono:</span> {new Intl.DateTimeFormat('pl-PL', { 
+              year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' 
+            }).format(new Date(client.createdAt))}
+          </div>
+          <div>
+            <span className="font-medium">Ostatnia modyfikacja:</span> {new Intl.DateTimeFormat('pl-PL', { 
+              year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' 
+            }).format(new Date(client.updatedAt))}
+          </div>
+        </div>
       </Card>
 
-      <Card className="space-y-4">
-        <h2 className="text-lg font-semibold">Dokumenty klienta</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="label">Szukaj</label>
-            <Input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Tytuł/Opis" />
-          </div>
-          <div>
-            <label className="label">Status</label>
-            <Select value={status} onChange={e=>setStatus(e.target.value as any)}>
-              <option value="">Wszystkie</option>
-              <option value="DRAFT">DRAFT</option>
-              <option value="SIGNED">SIGNED</option>
-            </Select>
-          </div>
-          <div>
-            <label className="label">Sortuj wg</label>
-            <Select value={sortBy} onChange={e=>setSortBy(e.target.value as any)}>
-              <option value="createdAt">Utworzono</option>
-              <option value="title">Tytuł</option>
-              <option value="status">Status</option>
-              <option value="id">ID</option>
-            </Select>
-          </div>
-          <div>
-            <label className="label">Kierunek</label>
-            <Select value={sortOrder} onChange={e=>setSortOrder(e.target.value as any)}>
-              <option value="asc">Rosnąco</option>
-              <option value="desc">Malejąco</option>
-            </Select>
-          </div>
+      {/* Tabs */}
+      <Card>
+        <div className="border-b border-gray-200 dark:border-gray-700">
+          <nav className="flex -mb-px">
+            <button
+              onClick={() => setActiveTab('documents')}
+              className={`px-6 py-3 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'documents'
+                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+              }`}
+            >
+              Dokumenty
+            </button>
+            <button
+              onClick={() => setActiveTab('invoices')}
+              className={`px-6 py-3 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'invoices'
+                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+              }`}
+            >
+              Faktury
+            </button>
+          </nav>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="label">Tytuł</label>
-            <Input value={formDoc.title} onChange={e=>setFormDoc(prev=>({ ...prev, title: e.target.value }))} />
-          </div>
-          <div>
-            <label className="label">Opis</label>
-            <Input value={formDoc.description} onChange={e=>setFormDoc(prev=>({ ...prev, description: e.target.value }))} />
-          </div>
-          <div>
-            <label className="label">Status</label>
-            <Select value={formDoc.status} onChange={e=>setFormDoc(prev=>({ ...prev, status: e.target.value as any }))}>
-              <option value="DRAFT">DRAFT</option>
-              <option value="SIGNED">SIGNED</option>
-            </Select>
-          </div>
-        </div>
-        {formDocErrors.length>0 && (
-          <ul className="mt-2 list-disc list-inside text-sm text-red-600">
-            {formDocErrors.map((e,i)=>(<li key={i}>{e}</li>))}
-          </ul>
-        )}
-        <Button variant="primary" onClick={addDoc}>Dodaj dokument</Button>
+        <div className="mt-6">
+          {activeTab === 'documents' && (
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold">Dokumenty klienta</h2>
 
-        <div className="mt-4 space-y-3">
-          {loading ? (
-            <p>Ładowanie...</p>
-          ) : (
-            <>
-              <Table>
-                <thead>
-                  <tr>
-                    <Th onClick={()=>toggleSort('id')} active={sortBy==='id'} order={sortOrder}>ID</Th>
-                    <Th onClick={()=>toggleSort('title')} active={sortBy==='title'} order={sortOrder}>Tytuł</Th>
-                    <Th onClick={()=>toggleSort('status')} active={sortBy==='status'} order={sortOrder}>Status</Th>
-                    <Th onClick={()=>toggleSort('createdAt')} active={sortBy==='createdAt'} order={sortOrder}>Data</Th>
-                    <th className="px-4 py-2"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(Array.isArray(docs) ? docs : []).map(doc => (
-                    <tr key={doc.id}>
-                      <Td>{doc.id}</Td>
-                      <Td>{doc.title}</Td>
-                      <Td>{doc.status}</Td>
-                      <Td>{new Intl.DateTimeFormat('pl-PL', { timeZone: 'UTC', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).format(new Date(doc.createdAt))}</Td>
-                      <Td>
-                        <Button onClick={()=>removeDoc(doc.id)}>Usuń</Button>
-                      </Td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-              <Pagination page={meta.page} pages={meta.pages} onPage={(p)=>loadDocs(p)} />
-            </>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="label">Szukaj</label>
+                  <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tytuł/Opis" />
+                </div>
+                <div>
+                  <label className="label">Status</label>
+                  <Select value={status} onChange={e => setStatus(e.target.value as any)}>
+                    <option value="">Wszystkie</option>
+                    <option value="DRAFT">DRAFT</option>
+                    <option value="SIGNED">SIGNED</option>
+                  </Select>
+                </div>
+                <div>
+                  <label className="label">Sortuj wg</label>
+                  <Select value={sortBy} onChange={e => setSortBy(e.target.value as any)}>
+                    <option value="createdAt">Utworzono</option>
+                    <option value="title">Tytuł</option>
+                    <option value="status">Status</option>
+                    <option value="id">ID</option>
+                  </Select>
+                </div>
+                <div>
+                  <label className="label">Kierunek</label>
+                  <Select value={sortOrder} onChange={e => setSortOrder(e.target.value as any)}>
+                    <option value="asc">Rosnąco</option>
+                    <option value="desc">Malejąco</option>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="label">Tytuł</label>
+                  <Input value={formDoc.title} onChange={e => setFormDoc(prev => ({ ...prev, title: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="label">Opis</label>
+                  <Input value={formDoc.description} onChange={e => setFormDoc(prev => ({ ...prev, description: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="label">Status</label>
+                  <Select value={formDoc.status} onChange={e => setFormDoc(prev => ({ ...prev, status: e.target.value as any }))}>
+                    <option value="DRAFT">DRAFT</option>
+                    <option value="SIGNED">SIGNED</option>
+                  </Select>
+                </div>
+              </div>
+              {formDocErrors.length > 0 && (
+                <ul className="mt-2 list-disc list-inside text-sm text-red-600">
+                  {formDocErrors.map((e, i) => (<li key={i}>{e}</li>))}
+                </ul>
+              )}
+              <Button variant="primary" onClick={addDoc}>Dodaj dokument</Button>
+
+              <div className="mt-4 space-y-3">
+                {loading ? (
+                  <p>Ładowanie...</p>
+                ) : (
+                  <>
+                    <Table>
+                      <thead>
+                        <tr>
+                          <Th onClick={() => toggleSort('id')} active={sortBy === 'id'} order={sortOrder}>ID</Th>
+                          <Th onClick={() => toggleSort('title')} active={sortBy === 'title'} order={sortOrder}>Tytuł</Th>
+                          <Th onClick={() => toggleSort('status')} active={sortBy === 'status'} order={sortOrder}>Status</Th>
+                          <Th onClick={() => toggleSort('createdAt')} active={sortBy === 'createdAt'} order={sortOrder}>Data</Th>
+                          <th className="px-4 py-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(Array.isArray(docs) ? docs : []).map(doc => (
+                          <tr key={doc.id}>
+                            <Td>{doc.id}</Td>
+                            <Td>{doc.title}</Td>
+                            <Td>{doc.status}</Td>
+                            <Td>{new Intl.DateTimeFormat('pl-PL', { timeZone: 'UTC', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).format(new Date(doc.createdAt))}</Td>
+                            <Td>
+                              <Button onClick={() => removeDoc(doc.id)}>Usuń</Button>
+                            </Td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                    <Pagination page={meta.page} pages={meta.pages} onPage={(p) => loadDocs(p)} />
+                  </>
+                )}
+              </div>
+            </div>
           )}
-        </div>
-      </Card>
 
-      <Card className="space-y-4">
-        <h2 className="text-lg font-semibold">Faktury</h2>
-        <div className="flex gap-2">
-          <button className={`px-3 py-1 rounded ${invoicesType==='issued'?'accent':''}`} onClick={()=>setInvoicesType('issued')}>Wystawione</button>
-          <button className={`px-3 py-1 rounded ${invoicesType==='planned'?'accent':''}`} onClick={()=>setInvoicesType('planned')}>Planowane</button>
-        </div>
-        <div className="mt-3">
-          <Table>
-            <thead>
-              <tr>
-                <Th>ID</Th>
-                <Th>Data wystawienia</Th>
-                <Th>Data zapłaty</Th>
-                <Th>Tytuł</Th>
-                <Th>Netto</Th>
-                <Th>VAT</Th>
-                <Th>Brutto</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.map(inv => (
-                <tr key={inv.id}>
-                  <Td><Link href={`/invoices/${inv.id}`}>{inv.id}</Link></Td>
-                  <Td>{new Intl.DateTimeFormat('pl-PL').format(new Date(inv.issueDate))}</Td>
-                  <Td>{new Intl.DateTimeFormat('pl-PL').format(new Date(inv.paymentDate))}</Td>
-                  <Td><Link href={`/invoices/${inv.id}`}>{inv.title}</Link></Td>
-                  <Td>{inv.net.toFixed(2)}</Td>
-                  <Td>{inv.vatPerc}% ({inv.vat.toFixed(2)})</Td>
-                  <Td>{inv.gross.toFixed(2)}</Td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+          {activeTab === 'invoices' && (
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold">Faktury</h2>
+              <div className="flex gap-2">
+                <button 
+                  className={`px-4 py-2 rounded transition-colors ${
+                    invoicesType === 'issued' 
+                      ? 'bg-primary-500 text-white' 
+                      : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
+                  }`} 
+                  onClick={() => setInvoicesType('issued')}
+                >
+                  Wystawione
+                </button>
+                <button 
+                  className={`px-4 py-2 rounded transition-colors ${
+                    invoicesType === 'planned' 
+                      ? 'bg-primary-500 text-white' 
+                      : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
+                  }`} 
+                  onClick={() => setInvoicesType('planned')}
+                >
+                  Planowane
+                </button>
+              </div>
+              <div className="mt-3">
+                <Table>
+                  <thead>
+                    <tr>
+                      <Th>ID</Th>
+                      <Th>Data wystawienia</Th>
+                      <Th>Data zapłaty</Th>
+                      <Th>Tytuł</Th>
+                      <Th>Netto</Th>
+                      <Th>VAT</Th>
+                      <Th>Brutto</Th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoices.map(inv => (
+                      <tr key={inv.id}>
+                        <Td><Link className="text-primary-600 hover:underline" href={`/invoices/${inv.id}`}>{inv.id}</Link></Td>
+                        <Td>{new Intl.DateTimeFormat('pl-PL').format(new Date(inv.issueDate))}</Td>
+                        <Td>{new Intl.DateTimeFormat('pl-PL').format(new Date(inv.paymentDate))}</Td>
+                        <Td><Link className="text-primary-600 hover:underline" href={`/invoices/${inv.id}`}>{inv.title}</Link></Td>
+                        <Td>{inv.net.toFixed(2)} zł</Td>
+                        <Td>{inv.vatPerc}% ({inv.vat.toFixed(2)} zł)</Td>
+                        <Td className="font-semibold">{inv.gross.toFixed(2)} zł</Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            </div>
+          )}
         </div>
       </Card>
     </div>

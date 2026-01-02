@@ -1,0 +1,10 @@
+import type { Prisma } from '@prisma/client';
+import * as z from 'zod';
+import { BalanceAdjustmentOrderByWithRelationInputObjectSchema as BalanceAdjustmentOrderByWithRelationInputObjectSchema } from './objects/BalanceAdjustmentOrderByWithRelationInput.schema';
+import { BalanceAdjustmentWhereInputObjectSchema as BalanceAdjustmentWhereInputObjectSchema } from './objects/BalanceAdjustmentWhereInput.schema';
+import { BalanceAdjustmentWhereUniqueInputObjectSchema as BalanceAdjustmentWhereUniqueInputObjectSchema } from './objects/BalanceAdjustmentWhereUniqueInput.schema';
+import { BalanceAdjustmentCountAggregateInputObjectSchema as BalanceAdjustmentCountAggregateInputObjectSchema } from './objects/BalanceAdjustmentCountAggregateInput.schema';
+
+export const BalanceAdjustmentCountSchema: z.ZodType<Prisma.BalanceAdjustmentCountArgs> = z.object({ orderBy: z.union([BalanceAdjustmentOrderByWithRelationInputObjectSchema, BalanceAdjustmentOrderByWithRelationInputObjectSchema.array()]).optional(), where: BalanceAdjustmentWhereInputObjectSchema.optional(), cursor: BalanceAdjustmentWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), select: z.union([ z.literal(true), BalanceAdjustmentCountAggregateInputObjectSchema ]).optional() }).strict() as unknown as z.ZodType<Prisma.BalanceAdjustmentCountArgs>;
+
+export const BalanceAdjustmentCountZodSchema = z.object({ orderBy: z.union([BalanceAdjustmentOrderByWithRelationInputObjectSchema, BalanceAdjustmentOrderByWithRelationInputObjectSchema.array()]).optional(), where: BalanceAdjustmentWhereInputObjectSchema.optional(), cursor: BalanceAdjustmentWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), select: z.union([ z.literal(true), BalanceAdjustmentCountAggregateInputObjectSchema ]).optional() }).strict();

@@ -8,7 +8,22 @@ import { Table, Th, Td } from '../../../components/ui/Table'
 import { Pagination } from '../../../components/ui/Pagination'
 import { ClientCreateSchema } from '../../../validation/client'
 
-type Client = { id: number; name: string; email?: string | null; phone?: string | null; createdAt: string }
+type Client = { 
+  id: number; 
+  name: string; 
+  email?: string | null; 
+  phone?: string | null; 
+  address?: string | null;
+  city?: string | null;
+  postalCode?: string | null;
+  country?: string | null;
+  nip?: string | null;
+  regon?: string | null;
+  legalForm?: string | null;
+  bankAccount?: string | null;
+  notes?: string | null;
+  createdAt: string;
+}
 
 type Meta = { page: number; pageSize: number; total: number; pages: number }
 
@@ -20,12 +35,44 @@ export default function ClientsPage() {
   const [loading, setLoading] = useState(true)
 
   const [search, setSearch] = useState('')
-  const [sortBy, setSortBy] = useState<'id'|'name'|'email'|'phone'|'createdAt'>('id')
-  const [sortOrder, setSortOrder] = useState<'asc'|'desc'>('asc')
-  const [pageSize, setPageSize] = useState(10)
+  const [sortBy, setSortBy] = useState<'id'|'name'|'email'|'phone'|'createdAt'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('clients_sortBy') as any) || 'id'
+    }
+    return 'id'
+  })
+  const [sortOrder, setSortOrder] = useState<'asc'|'desc'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('clients_sortOrder') as any) || 'asc'
+    }
+    return 'asc'
+  })
+  const [pageSize, setPageSize] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return Number(localStorage.getItem('clients_pageSize')) || 10
+    }
+    return 10
+  })
 
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [editingClient, setEditingClient] = useState<Client | null>(null)
   const [formErrors, setFormErrors] = useState<string[]>([])
-  const [form, setForm] = useState({ name: '', email: '', phone: '' })
+  const [lookupLoading, setLookupLoading] = useState(false)
+  const [lookupMessage, setLookupMessage] = useState<string | null>(null)
+  const [form, setForm] = useState({ 
+    name: '', 
+    email: '', 
+    phone: '', 
+    address: '', 
+    city: '', 
+    postalCode: '', 
+    country: 'Polska',
+    nip: '', 
+    regon: '', 
+    legalForm: '', 
+    bankAccount: '', 
+    notes: '' 
+  })
 
   const load = async (page = meta.page) => {
     setLoading(true)
@@ -65,6 +112,15 @@ export default function ClientsPage() {
 
   useEffect(() => { load(1) }, [search, sortBy, sortOrder, pageSize])
 
+  // Zapisz ustawienia sortowania i rozmiaru strony do localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('clients_sortBy', sortBy)
+      localStorage.setItem('clients_sortOrder', sortOrder)
+      localStorage.setItem('clients_pageSize', String(pageSize))
+    }
+  }, [sortBy, sortOrder, pageSize])
+
   const addClient = async () => {
     const parsed = ClientCreateSchema.safeParse(form)
     if (!parsed.success) {
@@ -73,8 +129,83 @@ export default function ClientsPage() {
     }
     setFormErrors([])
     await fetch('/api/clients', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(parsed.data) })
-    setForm({ name: '', email: '', phone: '' })
+    setForm({ name: '', email: '', phone: '', address: '', city: '', postalCode: '', country: 'Polska', nip: '', regon: '', legalForm: '', bankAccount: '', notes: '' })
+    setShowAddModal(false)
     await load(1)
+  }
+
+  const updateClient = async () => {
+    if (!editingClient) return
+    const parsed = ClientUpdateSchema.safeParse(form)
+    if (!parsed.success) {
+      setFormErrors(parsed.error.errors.map(e=>e.message))
+      return
+    }
+    setFormErrors([])
+    await fetch(`/api/clients/${editingClient.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(parsed.data) })
+    setEditingClient(null)
+    setForm({ name: '', email: '', phone: '', address: '', city: '', postalCode: '', country: 'Polska', nip: '', regon: '', legalForm: '', bankAccount: '', notes: '' })
+    await load(meta.page)
+  }
+
+  const openEditClient = (c: Client) => {
+    setEditingClient(c)
+    setForm({
+      name: c.name,
+      email: c.email || '',
+      phone: c.phone || '',
+      address: c.address || '',
+      city: c.city || '',
+      postalCode: c.postalCode || '',
+      country: c.country || 'Polska',
+      nip: c.nip || '',
+      regon: c.regon || '',
+      legalForm: c.legalForm || '',
+      bankAccount: c.bankAccount || '',
+      notes: c.notes || '',
+    })
+    setFormErrors([])
+  }
+
+  const fetchCompanyData = async () => {
+    if (!form.nip && !form.regon) {
+      setLookupMessage('Wprowadź NIP aby pobrać dane')
+      return
+    }
+    
+    setLookupLoading(true)
+    setLookupMessage(null)
+    setFormErrors([])
+    
+    try {
+      const param = form.nip ? `nip=${form.nip}` : `krs=${form.regon}`
+      const res = await fetch(`/api/company-lookup?${param}`)
+      const data = await res.json()
+      
+      if (data.success && data.data) {
+        // Auto-fill form with fetched data
+        setForm(prev => ({
+          ...prev,
+          name: data.data.name || prev.name,
+          address: data.data.address || prev.address,
+          city: data.data.city || prev.city,
+          postalCode: data.data.postalCode || prev.postalCode,
+          nip: data.data.nip || prev.nip,
+          regon: data.data.regon || prev.regon,
+          legalForm: data.data.legalForm || prev.legalForm,
+        }))
+        setLookupMessage('Dane pobrane pomyślnie')
+      } else {
+        setLookupMessage(data.error || 'Nie znaleziono firmy')
+        if (data.hint) {
+          setFormErrors([data.hint])
+        }
+      }
+    } catch (error) {
+      setLookupMessage('Błąd podczas pobierania danych')
+    } finally {
+      setLookupLoading(false)
+    }
   }
 
   const removeClient = async (id: number) => {
@@ -89,11 +220,21 @@ export default function ClientsPage() {
   return (
     <div className="space-y-6">
       <Card>
-        <h1 className="text-xl font-semibold mb-4">Lista Klientów</h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl font-semibold">Lista Klientów</h1>
+          <Button variant="primary" onClick={() => { 
+            setShowAddModal(true); 
+            setFormErrors([]); 
+            setLookupMessage(null);
+            setForm({ name: '', email: '', phone: '', address: '', city: '', postalCode: '', country: 'Polska', nip: '', regon: '', legalForm: '', bankAccount: '', notes: '' }); 
+          }}>
+            Dodaj klienta
+          </Button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="label">Szukaj</label>
-            <Input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Nazwa/Email/Telefon" />
+            <Input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Nazwa/Email/Telefon/NIP" />
           </div>
           <div>
             <label className="label">Sortuj wg</label>
@@ -112,34 +253,14 @@ export default function ClientsPage() {
               <option value="desc">Malejąco</option>
             </Select>
           </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="label">Nazwa</label>
-            <Input value={form.name} onChange={e=>setForm(prev=>({ ...prev, name: e.target.value }))} />
+            <label className="label">Rozmiar strony</label>
+            <Select value={String(pageSize)} onChange={e=>setPageSize(Number(e.target.value))}>
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+            </Select>
           </div>
-          <div>
-            <label className="label">Email</label>
-            <Input value={form.email} onChange={e=>setForm(prev=>({ ...prev, email: e.target.value }))} />
-          </div>
-          <div>
-            <label className="label">Telefon</label>
-            <Input value={form.phone} onChange={e=>setForm(prev=>({ ...prev, phone: e.target.value }))} />
-          </div>
-        </div>
-        {formErrors.length>0 && (
-          <ul className="mt-2 list-disc list-inside text-sm text-red-600">
-            {formErrors.map((e,i)=>(<li key={i}>{e}</li>))}
-          </ul>
-        )}
-        <div className="mt-4 flex items-center gap-3">
-          <Button variant="primary" onClick={addClient}>Dodaj klienta</Button>
-          <label className="label">Rozmiar strony</label>
-          <Select value={String(pageSize)} onChange={e=>setPageSize(Number(e.target.value))}>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-          </Select>
         </div>
       </Card>
 
@@ -155,6 +276,8 @@ export default function ClientsPage() {
                   <Th onClick={()=>toggleSort('name')} active={sortBy==='name'} order={sortOrder}>Nazwa</Th>
                   <Th onClick={()=>toggleSort('email')} active={sortBy==='email'} order={sortOrder}>Email</Th>
                   <Th onClick={()=>toggleSort('phone')} active={sortBy==='phone'} order={sortOrder}>Telefon</Th>
+                  <Th>NIP</Th>
+                  <Th>Miasto</Th>
                   <Th onClick={()=>toggleSort('createdAt')} active={sortBy==='createdAt'} order={sortOrder}>Utworzono</Th>
                   <th className="px-4 py-2"></th>
                 </tr>
@@ -168,9 +291,14 @@ export default function ClientsPage() {
                     </Td>
                     <Td>{c.email ?? '-'}</Td>
                     <Td>{c.phone ?? '-'}</Td>
+                    <Td>{c.nip ?? '-'}</Td>
+                    <Td>{c.city ?? '-'}</Td>
                     <Td>{new Intl.DateTimeFormat('pl-PL', { timeZone: 'UTC', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).format(new Date(c.createdAt))}</Td>
                     <Td>
-                      <Button onClick={()=>removeClient(c.id)}>Usuń</Button>
+                      <div className="flex gap-2">
+                        <Button onClick={()=>openEditClient(c)}>Edytuj</Button>
+                        <Button onClick={()=>removeClient(c.id)}>Usuń</Button>
+                      </div>
                     </Td>
                   </tr>
                 ))}
@@ -180,6 +308,167 @@ export default function ClientsPage() {
           </div>
         )}
       </Card>
+
+      {/* Add client modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded shadow w-full max-w-2xl my-8 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold mb-4">Dodaj klienta</h3>
+            
+            {/* Company lookup section */}
+            <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                  Autouzupełnianie danych z rejestru
+                </div>
+                <Button 
+                  onClick={fetchCompanyData} 
+                  disabled={lookupLoading || (!form.nip && !form.regon)}
+                  className="text-sm"
+                >
+                  {lookupLoading ? 'Pobieranie...' : 'Pobierz dane'}
+                </Button>
+              </div>
+              <div className="text-xs text-blue-700 dark:text-blue-300">
+                Wprowadź NIP i kliknij "Pobierz dane" aby automatycznie wypełnić formularz danymi z CEIDG
+              </div>
+              {lookupMessage && (
+                <div className={`text-xs mt-2 ${lookupMessage.includes('Błąd') || lookupMessage.includes('Nie') ? 'text-red-600' : 'text-green-600'}`}>
+                  {lookupMessage}
+                </div>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="label">Nazwa *</label>
+                <Input value={form.name} onChange={e=>setForm(prev=>({ ...prev, name: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">Forma prawna</label>
+                <Input value={form.legalForm} onChange={e=>setForm(prev=>({ ...prev, legalForm: e.target.value }))} placeholder="np. Sp. z o.o., S.A., JDG" />
+              </div>
+              <div>
+                <label className="label">Email</label>
+                <Input value={form.email} onChange={e=>setForm(prev=>({ ...prev, email: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">Telefon</label>
+                <Input value={form.phone} onChange={e=>setForm(prev=>({ ...prev, phone: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">NIP</label>
+                <Input value={form.nip} onChange={e=>setForm(prev=>({ ...prev, nip: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">REGON</label>
+                <Input value={form.regon} onChange={e=>setForm(prev=>({ ...prev, regon: e.target.value }))} />
+              </div>
+              <div className="md:col-span-2">
+                <label className="label">Adres</label>
+                <Input value={form.address} onChange={e=>setForm(prev=>({ ...prev, address: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">Miasto</label>
+                <Input value={form.city} onChange={e=>setForm(prev=>({ ...prev, city: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">Kod pocztowy</label>
+                <Input value={form.postalCode} onChange={e=>setForm(prev=>({ ...prev, postalCode: e.target.value }))} placeholder="00-000" />
+              </div>
+              <div>
+                <label className="label">Kraj</label>
+                <Input value={form.country} onChange={e=>setForm(prev=>({ ...prev, country: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">Numer konta</label>
+                <Input value={form.bankAccount} onChange={e=>setForm(prev=>({ ...prev, bankAccount: e.target.value }))} />
+              </div>
+              <div className="md:col-span-2">
+                <label className="label">Notatki</label>
+                <Input value={form.notes} onChange={e=>setForm(prev=>({ ...prev, notes: e.target.value }))} />
+              </div>
+            </div>
+            {formErrors.length > 0 && (
+              <ul className="mt-2 list-disc list-inside text-sm text-red-600">
+                {formErrors.map((e, i) => (<li key={i}>{e}</li>))}
+              </ul>
+            )}
+            <div className="mt-4 flex justify-end gap-2">
+              <Button onClick={() => { setShowAddModal(false); setFormErrors([]); setLookupMessage(null); }}>Anuluj</Button>
+              <Button variant="primary" onClick={addClient}>Dodaj</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit client modal */}
+      {editingClient && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded shadow w-full max-w-2xl my-8 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold mb-4">Edytuj klienta</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="label">Nazwa *</label>
+                <Input value={form.name} onChange={e=>setForm(prev=>({ ...prev, name: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">Forma prawna</label>
+                <Input value={form.legalForm} onChange={e=>setForm(prev=>({ ...prev, legalForm: e.target.value }))} placeholder="np. Sp. z o.o., S.A., JDG" />
+              </div>
+              <div>
+                <label className="label">Email</label>
+                <Input value={form.email} onChange={e=>setForm(prev=>({ ...prev, email: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">Telefon</label>
+                <Input value={form.phone} onChange={e=>setForm(prev=>({ ...prev, phone: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">NIP</label>
+                <Input value={form.nip} onChange={e=>setForm(prev=>({ ...prev, nip: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">REGON</label>
+                <Input value={form.regon} onChange={e=>setForm(prev=>({ ...prev, regon: e.target.value }))} />
+              </div>
+              <div className="md:col-span-2">
+                <label className="label">Adres</label>
+                <Input value={form.address} onChange={e=>setForm(prev=>({ ...prev, address: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">Miasto</label>
+                <Input value={form.city} onChange={e=>setForm(prev=>({ ...prev, city: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">Kod pocztowy</label>
+                <Input value={form.postalCode} onChange={e=>setForm(prev=>({ ...prev, postalCode: e.target.value }))} placeholder="00-000" />
+              </div>
+              <div>
+                <label className="label">Kraj</label>
+                <Input value={form.country} onChange={e=>setForm(prev=>({ ...prev, country: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">Numer konta</label>
+                <Input value={form.bankAccount} onChange={e=>setForm(prev=>({ ...prev, bankAccount: e.target.value }))} />
+              </div>
+              <div className="md:col-span-2">
+                <label className="label">Notatki</label>
+                <Input value={form.notes} onChange={e=>setForm(prev=>({ ...prev, notes: e.target.value }))} />
+              </div>
+            </div>
+            {formErrors.length > 0 && (
+              <ul className="mt-2 list-disc list-inside text-sm text-red-600">
+                {formErrors.map((e, i) => (<li key={i}>{e}</li>))}
+              </ul>
+            )}
+            <div className="mt-4 flex justify-end gap-2">
+              <Button onClick={() => { setEditingClient(null); setFormErrors([]); }}>Anuluj</Button>
+              <Button variant="primary" onClick={updateClient}>Zapisz</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

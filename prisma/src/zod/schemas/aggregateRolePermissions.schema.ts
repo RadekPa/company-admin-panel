@@ -1,0 +1,14 @@
+import type { Prisma } from '@prisma/client';
+import * as z from 'zod';
+import { RolePermissionsOrderByWithRelationInputObjectSchema as RolePermissionsOrderByWithRelationInputObjectSchema } from './objects/RolePermissionsOrderByWithRelationInput.schema';
+import { RolePermissionsWhereInputObjectSchema as RolePermissionsWhereInputObjectSchema } from './objects/RolePermissionsWhereInput.schema';
+import { RolePermissionsWhereUniqueInputObjectSchema as RolePermissionsWhereUniqueInputObjectSchema } from './objects/RolePermissionsWhereUniqueInput.schema';
+import { RolePermissionsCountAggregateInputObjectSchema as RolePermissionsCountAggregateInputObjectSchema } from './objects/RolePermissionsCountAggregateInput.schema';
+import { RolePermissionsMinAggregateInputObjectSchema as RolePermissionsMinAggregateInputObjectSchema } from './objects/RolePermissionsMinAggregateInput.schema';
+import { RolePermissionsMaxAggregateInputObjectSchema as RolePermissionsMaxAggregateInputObjectSchema } from './objects/RolePermissionsMaxAggregateInput.schema';
+import { RolePermissionsAvgAggregateInputObjectSchema as RolePermissionsAvgAggregateInputObjectSchema } from './objects/RolePermissionsAvgAggregateInput.schema';
+import { RolePermissionsSumAggregateInputObjectSchema as RolePermissionsSumAggregateInputObjectSchema } from './objects/RolePermissionsSumAggregateInput.schema';
+
+export const RolePermissionsAggregateSchema: z.ZodType<Prisma.RolePermissionsAggregateArgs> = z.object({ orderBy: z.union([RolePermissionsOrderByWithRelationInputObjectSchema, RolePermissionsOrderByWithRelationInputObjectSchema.array()]).optional(), where: RolePermissionsWhereInputObjectSchema.optional(), cursor: RolePermissionsWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), _count: z.union([ z.literal(true), RolePermissionsCountAggregateInputObjectSchema ]).optional(), _min: RolePermissionsMinAggregateInputObjectSchema.optional(), _max: RolePermissionsMaxAggregateInputObjectSchema.optional(), _avg: RolePermissionsAvgAggregateInputObjectSchema.optional(), _sum: RolePermissionsSumAggregateInputObjectSchema.optional() }).strict() as unknown as z.ZodType<Prisma.RolePermissionsAggregateArgs>;
+
+export const RolePermissionsAggregateZodSchema = z.object({ orderBy: z.union([RolePermissionsOrderByWithRelationInputObjectSchema, RolePermissionsOrderByWithRelationInputObjectSchema.array()]).optional(), where: RolePermissionsWhereInputObjectSchema.optional(), cursor: RolePermissionsWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), _count: z.union([ z.literal(true), RolePermissionsCountAggregateInputObjectSchema ]).optional(), _min: RolePermissionsMinAggregateInputObjectSchema.optional(), _max: RolePermissionsMaxAggregateInputObjectSchema.optional(), _avg: RolePermissionsAvgAggregateInputObjectSchema.optional(), _sum: RolePermissionsSumAggregateInputObjectSchema.optional() }).strict();

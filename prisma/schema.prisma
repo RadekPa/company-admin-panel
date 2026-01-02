@@ -16,6 +16,7 @@ datasource db {
 
 enum Role {
   ADMIN
+  ADVANCED
   USER
 }
 
@@ -35,15 +36,34 @@ model User {
   updatedAt    DateTime @updatedAt
 }
 
+model RolePermissions {
+  id          Int      @id @default(autoincrement())
+  module      String   @unique
+  userAccess  Boolean  @default(false)
+  advancedAccess Boolean @default(false)
+  adminAccess Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model Client {
-  id        Int        @id @default(autoincrement())
-  name      String
-  email     String?
-  phone     String?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  documents Document[]
-  invoices  Invoice[]
+  id           Int        @id @default(autoincrement())
+  name         String
+  email        String?
+  phone        String?
+  address      String?
+  city         String?
+  postalCode   String?
+  country      String?     @default("Polska")
+  nip          String?
+  regon        String?
+  legalForm    String?     // np. "Sp. z o.o.", "S.A.", "JDG", etc.
+  bankAccount  String?
+  notes        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  documents    Document[]
+  invoices     Invoice[]
 }
 
 model Document {
@@ -71,4 +91,13 @@ model Invoice {
   status     String   @default("issued") // 'issued' | 'planned'
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model BalanceAdjustment {
+  id          Int      @id @default(autoincrement())
+  date        DateTime
+  amount      Float
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

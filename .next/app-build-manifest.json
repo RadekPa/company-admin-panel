@@ -1,9 +1,9 @@
 {
   "pages": {
-    "/(protected)/invoices/page": [
+    "/(protected)/dashboard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(protected)/invoices/page.js"
+      "static/chunks/app/(protected)/dashboard/page.js"
     ],
     "/(protected)/layout": [
       "static/chunks/webpack.js",
@@ -15,6 +15,46 @@
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
+    ],
+    "/login/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/login/page.js"
+    ],
+    "/(protected)/clients/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(protected)/clients/page.js"
+    ],
+    "/(protected)/documents/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(protected)/documents/page.js"
+    ],
+    "/(protected)/invoices/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(protected)/invoices/page.js"
+    ],
+    "/(protected)/invoices/calendar/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(protected)/invoices/calendar/page.js"
+    ],
+    "/(protected)/clients/[id]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(protected)/clients/[id]/page.js"
+    ],
+    "/(protected)/users/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(protected)/users/page.js"
+    ],
+    "/(protected)/permissions/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(protected)/permissions/page.js"
     ]
   }
 }
