@@ -119,65 +119,73 @@ export default function CalendarPage(){
 
   return (
     <div className="space-y-6">
-      <Card>
-        <div className="space-y-4 mb-6">
-          <div className="flex items-center justify-between">
+      <Card className="p-6">
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-xl font-semibold">Faktury - kalendarz (cashflow)</h1>
-              <p className="text-sm text-gray-400">Wystawione vs planowane przychody</p>
+              <h1 className="text-2xl font-bold">Cashflow</h1>
+              <p className="text-sm text-muted-foreground mt-1">Wystawione vs planowane przychody</p>
             </div>
             <Button variant="primary" onClick={() => { setShowAddAdjustment(true); setAdjustmentForm({ date: today, amount: '', description: '' }); }}>
               Dodaj korektę stanu
             </Button>
           </div>
+          
+          <div className="space-y-4">
 
-          {/* View mode selector */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-400">Widok:</span>
-            <Button variant={view === 'year' ? 'primary' : 'default'} onClick={() => updateView('year')} className="text-sm">
-              Rok
-            </Button>
-            <Button variant={view === 'month' ? 'primary' : 'default'} onClick={() => updateView('month')} className="text-sm">
-              Miesiąc
-            </Button>
-            <Button variant={view === 'custom' ? 'primary' : 'default'} onClick={() => updateView('custom')} className="text-sm">
-              Zadane daty
-            </Button>
+            {/* View mode selector */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-sm font-medium text-muted-foreground">Widok:</span>
+              <div className="flex gap-2">
+                <Button variant={view === 'year' ? 'primary' : 'outline'} onClick={() => updateView('year')} className="text-sm">
+                  Rok
+                </Button>
+                <Button variant={view === 'month' ? 'primary' : 'outline'} onClick={() => updateView('month')} className="text-sm">
+                  Miesiąc
+                </Button>
+                <Button variant={view === 'custom' ? 'primary' : 'outline'} onClick={() => updateView('custom')} className="text-sm">
+                  Zadane daty
+                </Button>
+              </div>
+            </div>
+
+            {/* Year selector (shown only in year mode) */}
+            {view === 'year' && (
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-muted-foreground">Rok:</span>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" onClick={() => changeYear(selectedYear - 1)} className="text-sm px-2">
+                    ‹
+                  </Button>
+                  <span className="text-sm font-semibold px-4 py-2 rounded border border-gray-200 dark:border-gray-700 min-w-16 text-center">{selectedYear}</span>
+                  <Button variant="outline" onClick={() => changeYear(selectedYear + 1)} className="text-sm px-2">
+                    ›
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Custom date inputs (shown only in custom mode) */}
+            {view === 'custom' && (
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-muted-foreground">Od</label>
+                  <input className="flex h-9 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" type="date" value={from} onChange={(e)=>setFrom(e.target.value)} />
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-muted-foreground">Do</label>
+                  <input className="flex h-9 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" type="date" value={to} onChange={(e)=>setTo(e.target.value)} />
+                </div>
+              </div>
+            )}
           </div>
-
-          {/* Year selector (shown only in year mode) */}
-          {view === 'year' && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-400">Rok:</span>
-              <Button variant="default" onClick={() => changeYear(selectedYear - 1)} className="text-sm">
-                ‹
-              </Button>
-              <span className="text-sm font-semibold px-4">{selectedYear}</span>
-              <Button variant="default" onClick={() => changeYear(selectedYear + 1)} className="text-sm">
-                ›
-              </Button>
-            </div>
-          )}
-
-          {/* Custom date inputs (shown only in custom mode) */}
-          {view === 'custom' && (
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-gray-400">Od</label>
-                <input className="border px-2 py-1 rounded dark:bg-gray-800 dark:border-gray-600 dark:text-white" type="date" value={from} onChange={(e)=>setFrom(e.target.value)} />
-              </div>
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-gray-400">Do</label>
-                <input className="border px-2 py-1 rounded dark:bg-gray-800 dark:border-gray-600 dark:text-white" type="date" value={to} onChange={(e)=>setTo(e.target.value)} />
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Chart */}
-        <div style={{ width: '100%', height: 350 }} className="mb-6">
-          <ResponsiveContainer>
-            <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6 mb-8">
+          <div style={{ width: '100%', height: 400 }}>
+            <ResponsiveContainer>
+              <LineChart data={data} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
                 dataKey="date" 
@@ -195,13 +203,17 @@ export default function CalendarPage(){
               <Line type="monotone" dataKey="planned" stroke="#f59e0b" dot={view !== 'year'} name="Planowane" strokeWidth={2} />
               <Line type="monotone" dataKey="adjustment" stroke="#8b5cf6" dot={view !== 'year'} name="Korekta stanu" strokeWidth={2} />
               <Line type="monotone" dataKey="cumulative" stroke="#10b981" dot={view !== 'year'} name="Skumulowane" strokeWidth={2} />
-              {view !== 'custom' && <ReferenceLine x={today} stroke="#ef4444" strokeDasharray="5 5" label={{ value: 'Dzisiaj', position: 'top', fill: '#ef4444', fontSize: 12 }} />}
-            </LineChart>
-          </ResponsiveContainer>
+                {view !== 'custom' && <ReferenceLine x={today} stroke="#ef4444" strokeDasharray="5 5" label={{ value: 'Dzisiaj', position: 'top', fill: '#ef4444', fontSize: 12 }} />}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        {loading ? <p>Ładowanie...</p> : (
-          <Table>
+        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+          {loading ? (
+            <p className="p-6 text-center text-muted-foreground">Ładowanie...</p>
+          ) : (
+            <Table>
             <thead>
               <tr>
                 <Th>Data</Th>
@@ -239,9 +251,10 @@ export default function CalendarPage(){
                   </Td>
                 </tr>
               ))}
-            </tbody>
-          </Table>
-        )}
+              </tbody>
+            </Table>
+          )}
+        </div>
       </Card>
 
       {/* Add adjustment modal */}
