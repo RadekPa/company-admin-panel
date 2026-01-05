@@ -9,6 +9,7 @@ const makeSchema = () => z.object({
   passwordHash: z.literal(true).optional(),
   role: z.literal(true).optional(),
   permissions: z.literal(true).optional(),
+  locale: z.literal(true).optional(),
   createdAt: z.literal(true).optional(),
   updatedAt: z.literal(true).optional(),
   _all: z.literal(true).optional()

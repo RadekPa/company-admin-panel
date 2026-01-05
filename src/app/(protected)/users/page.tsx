@@ -1,8 +1,8 @@
 "use client"
 import { useEffect, useState } from 'react'
-import { Card } from '../../../components/ui/Card'
-import { Button } from '../../../components/ui/Button'
-import { Input, Select } from '../../../components/ui/Input'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Table, Th, Td } from '../../../components/ui/Table'
 import { Pagination } from '../../../components/ui/Pagination'
 import { UserCreateSchema, UserUpdateSchema } from '../../../validation/user'
@@ -82,16 +82,16 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-semibold">Użytkownicy</h1>
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Użytkownicy</h1>
           <Button variant="primary" onClick={() => { setShowAddModal(true); setFormErrors([]); }}>Dodaj użytkownika</Button>
         </div>
       </Card>
 
-      <Card>
-        {loading ? <p>Ładowanie...</p> : (
-          <div className="space-y-3">
+      <Card className="p-6">
+        {loading ? <p className="text-center text-muted-foreground py-8">Ładowanie...</p> : (
+          <div className="space-y-4">
             <Table>
               <thead>
                 <tr>
@@ -109,11 +109,11 @@ export default function UsersPage() {
                     <Td>{u.email}</Td>
                     <Td>{u.name ?? '-'}</Td>
                     <Td>
-                      <Select value={u.role} onChange={e=>updateRole(u.id, e.target.value as any)}>
+                      <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={u.role} onChange={e=>updateRole(u.id, e.target.value as any)}>
                         <option value="USER">USER</option>
                         <option value="ADVANCED">ADVANCED</option>
                         <option value="ADMIN">ADMIN</option>
-                      </Select>
+                      </select>
                     </Td>
                     <Td>
                       <div className="flex items-center gap-2">
@@ -129,11 +129,11 @@ export default function UsersPage() {
               <Pagination page={meta.page} pages={meta.pages} onPage={(p)=>{ setPage(p); load(p) }} />
               <div>
                 <label className="label mr-2">Ilość</label>
-                <Select value={String(pageSize)} onChange={e=>{ setPageSize(Number(e.target.value)); setPage(1); load(1) }}>
+                <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={String(pageSize)} onChange={e=>{ setPageSize(Number(e.target.value)); setPage(1); load(1) }}>
                   <option value="5">5</option>
                   <option value="10">10</option>
                   <option value="20">20</option>
-                </Select>
+                </select>
               </div>
             </div>
           </div>
@@ -160,11 +160,11 @@ export default function UsersPage() {
               </div>
               <div>
                 <label className="label">Rola</label>
-                <Select value={form.role} onChange={e=>setForm(prev=>({ ...prev, role: e.target.value }))}>
+                <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={form.role} onChange={e=>setForm(prev=>({ ...prev, role: e.target.value }))}>
                   <option value="USER">USER</option>
                   <option value="ADVANCED">ADVANCED</option>
                   <option value="ADMIN">ADMIN</option>
-                </Select>
+                </select>
               </div>
             </div>
             {formErrors.length > 0 && (
@@ -191,11 +191,11 @@ export default function UsersPage() {
               <label className="label">Nazwa</label>
               <Input value={editingUser.name ?? ''} onChange={e=>setEditingUser(prev=>prev?{ ...prev, name: e.target.value }:prev)} />
               <label className="label">Rola</label>
-              <Select value={editingUser.role} onChange={e=>setEditingUser(prev=>prev?{ ...prev, role: e.target.value as any }:prev)}>
+              <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={editingUser.role} onChange={e=>setEditingUser(prev=>prev?{ ...prev, role: e.target.value as any }:prev)}>
                 <option value="USER">USER</option>
                 <option value="ADVANCED">ADVANCED</option>
                 <option value="ADMIN">ADMIN</option>
-              </Select>
+              </select>
 
               <div className="flex items-center justify-between">
                 <div>

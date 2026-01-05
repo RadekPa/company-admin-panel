@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card } from '../../../../components/ui/Card'
+import { Card } from '@/components/ui/card'
 
 type Item = { description: string; qty: number; unitNet: number; vatPerc: number; vat: number; totalGross: number }
 

@@ -6,6 +6,7 @@ export const UserCreateResultSchema = z.object({
   passwordHash: z.string(),
   role: z.unknown(),
   permissions: z.unknown().optional(),
+  locale: z.string(),
   createdAt: z.date(),
   updatedAt: z.date()
 });

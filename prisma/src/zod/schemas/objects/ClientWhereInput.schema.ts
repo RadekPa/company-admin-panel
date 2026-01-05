@@ -5,7 +5,8 @@ import { StringFilterObjectSchema as StringFilterObjectSchema } from './StringFi
 import { StringNullableFilterObjectSchema as StringNullableFilterObjectSchema } from './StringNullableFilter.schema';
 import { DateTimeFilterObjectSchema as DateTimeFilterObjectSchema } from './DateTimeFilter.schema';
 import { DocumentListRelationFilterObjectSchema as DocumentListRelationFilterObjectSchema } from './DocumentListRelationFilter.schema';
-import { InvoiceListRelationFilterObjectSchema as InvoiceListRelationFilterObjectSchema } from './InvoiceListRelationFilter.schema'
+import { InvoiceListRelationFilterObjectSchema as InvoiceListRelationFilterObjectSchema } from './InvoiceListRelationFilter.schema';
+import { AuthorListRelationFilterObjectSchema as AuthorListRelationFilterObjectSchema } from './AuthorListRelationFilter.schema'
 
 const clientwhereinputSchema = z.object({
   AND: z.union([z.lazy(() => ClientWhereInputObjectSchema), z.lazy(() => ClientWhereInputObjectSchema).array()]).optional(),
@@ -27,7 +28,8 @@ const clientwhereinputSchema = z.object({
   createdAt: z.union([z.lazy(() => DateTimeFilterObjectSchema), z.coerce.date()]).optional(),
   updatedAt: z.union([z.lazy(() => DateTimeFilterObjectSchema), z.coerce.date()]).optional(),
   documents: z.lazy(() => DocumentListRelationFilterObjectSchema).optional(),
-  invoices: z.lazy(() => InvoiceListRelationFilterObjectSchema).optional()
+  invoices: z.lazy(() => InvoiceListRelationFilterObjectSchema).optional(),
+  authors: z.lazy(() => AuthorListRelationFilterObjectSchema).optional()
 }).strict();
 export const ClientWhereInputObjectSchema: z.ZodType<Prisma.ClientWhereInput> = clientwhereinputSchema as unknown as z.ZodType<Prisma.ClientWhereInput>;
 export const ClientWhereInputObjectZodSchema = clientwhereinputSchema;

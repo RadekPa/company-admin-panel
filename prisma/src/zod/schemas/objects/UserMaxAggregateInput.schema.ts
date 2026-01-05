@@ -8,6 +8,7 @@ const makeSchema = () => z.object({
   email: z.literal(true).optional(),
   passwordHash: z.literal(true).optional(),
   role: z.literal(true).optional(),
+  locale: z.literal(true).optional(),
   createdAt: z.literal(true).optional(),
   updatedAt: z.literal(true).optional()
 }).strict();

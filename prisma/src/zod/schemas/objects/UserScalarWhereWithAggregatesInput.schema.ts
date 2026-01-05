@@ -18,6 +18,7 @@ const userscalarwherewithaggregatesinputSchema = z.object({
   passwordHash: z.union([z.lazy(() => StringWithAggregatesFilterObjectSchema), z.string()]).optional(),
   role: z.union([z.lazy(() => EnumRoleWithAggregatesFilterObjectSchema), RoleSchema]).optional(),
   permissions: z.lazy(() => JsonNullableWithAggregatesFilterObjectSchema).optional(),
+  locale: z.union([z.lazy(() => StringWithAggregatesFilterObjectSchema), z.string()]).optional(),
   createdAt: z.union([z.lazy(() => DateTimeWithAggregatesFilterObjectSchema), z.coerce.date()]).optional(),
   updatedAt: z.union([z.lazy(() => DateTimeWithAggregatesFilterObjectSchema), z.coerce.date()]).optional()
 }).strict();

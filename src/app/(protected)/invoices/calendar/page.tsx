@@ -1,10 +1,10 @@
 "use client"
 import { useEffect, useState } from 'react'
-import { Card } from '../../../../components/ui/Card'
+import { Card } from '../../../../components/ui/card'
 import { Table, Th, Td } from '../../../../components/ui/Table'
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts'
-import { Button } from '../../../../components/ui/Button'
-import { Input } from '../../../../components/ui/Input'
+import { Button } from '../../../../components/ui/button'
+import { Input } from '../../../../components/ui/input'
 
 type Row = { date: string; issued: number; planned: number; adjustment: number; adjustmentIds: number[]; total: number; cumulative: number }
 type ViewMode = 'year' | 'month' | 'custom'
@@ -210,7 +210,7 @@ export default function CalendarPage(){
                 <Th className="text-right">Korekta stanu</Th>
                 <Th className="text-right">Suma</Th>
                 <Th className="text-right">Skumulowane</Th>
-                <Th></Th>
+                <Th> </Th>
               </tr>
             </thead>
             <tbody>
@@ -219,7 +219,7 @@ export default function CalendarPage(){
                   <Td>{new Intl.DateTimeFormat('pl-PL').format(new Date(r.date))}</Td>
                   <Td className="text-right">{formatCurrency(r.issued)}</Td>
                   <Td className="text-right">{formatCurrency(r.planned)}</Td>
-                  <Td className="text-right" style={{ color: r.adjustment !== 0 ? '#8b5cf6' : undefined }}>
+                  <Td className={`text-right ${r.adjustment !== 0 ? 'text-purple-600' : ''}`}>
                     {formatCurrency(r.adjustment)}
                   </Td>
                   <Td className="text-right">{formatCurrency(r.total)}</Td>

@@ -18,7 +18,7 @@ export const authOptions: NextAuthOptions = {
         if (!user) return null
         const ok = await bcrypt.compare(credentials.password, user.passwordHash)
         if (!ok) return null
-  return { id: String(user.id), name: user.name ?? user.email, email: user.email, role: user.role, permissions: (user as any).permissions ?? {} }
+  return { id: String(user.id), name: user.name ?? user.email, email: user.email, role: user.role, permissions: (user as any).permissions ?? {}, locale: user.locale }
       }
     })
   ],
@@ -31,6 +31,8 @@ export const authOptions: NextAuthOptions = {
         token.role = (user as any).role
         // @ts-ignore
         token.permissions = (user as any).permissions ?? {}
+        // @ts-ignore
+        token.locale = (user as any).locale ?? 'pl'
       }
       return token
     },
@@ -40,6 +42,8 @@ export const authOptions: NextAuthOptions = {
       // @ts-ignore
       // @ts-ignore
       session.user.role = token.role
+      // @ts-ignore
+      session.user.locale = token.locale ?? 'pl'
       // @ts-ignore
       session.user.permissions = token.permissions ?? {}
       return session

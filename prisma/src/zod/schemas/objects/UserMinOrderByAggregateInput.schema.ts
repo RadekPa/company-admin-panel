@@ -8,6 +8,7 @@ const makeSchema = () => z.object({
   email: SortOrderSchema.optional(),
   passwordHash: SortOrderSchema.optional(),
   role: SortOrderSchema.optional(),
+  locale: SortOrderSchema.optional(),
   createdAt: SortOrderSchema.optional(),
   updatedAt: SortOrderSchema.optional()
 }).strict();

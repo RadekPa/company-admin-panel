@@ -3,7 +3,8 @@ import type { Prisma } from '@prisma/client';
 import { StringFieldUpdateOperationsInputObjectSchema as StringFieldUpdateOperationsInputObjectSchema } from './StringFieldUpdateOperationsInput.schema';
 import { NullableStringFieldUpdateOperationsInputObjectSchema as NullableStringFieldUpdateOperationsInputObjectSchema } from './NullableStringFieldUpdateOperationsInput.schema';
 import { DateTimeFieldUpdateOperationsInputObjectSchema as DateTimeFieldUpdateOperationsInputObjectSchema } from './DateTimeFieldUpdateOperationsInput.schema';
-import { DocumentUpdateManyWithoutClientNestedInputObjectSchema as DocumentUpdateManyWithoutClientNestedInputObjectSchema } from './DocumentUpdateManyWithoutClientNestedInput.schema'
+import { DocumentUpdateManyWithoutClientNestedInputObjectSchema as DocumentUpdateManyWithoutClientNestedInputObjectSchema } from './DocumentUpdateManyWithoutClientNestedInput.schema';
+import { AuthorUpdateManyWithoutClientNestedInputObjectSchema as AuthorUpdateManyWithoutClientNestedInputObjectSchema } from './AuthorUpdateManyWithoutClientNestedInput.schema'
 
 const makeSchema = () => z.object({
   name: z.union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputObjectSchema)]).optional(),
@@ -20,7 +21,8 @@ const makeSchema = () => z.object({
   notes: z.union([z.string(), z.lazy(() => NullableStringFieldUpdateOperationsInputObjectSchema)]).optional().nullable(),
   createdAt: z.union([z.coerce.date(), z.lazy(() => DateTimeFieldUpdateOperationsInputObjectSchema)]).optional(),
   updatedAt: z.union([z.coerce.date(), z.lazy(() => DateTimeFieldUpdateOperationsInputObjectSchema)]).optional(),
-  documents: z.lazy(() => DocumentUpdateManyWithoutClientNestedInputObjectSchema).optional()
+  documents: z.lazy(() => DocumentUpdateManyWithoutClientNestedInputObjectSchema).optional(),
+  authors: z.lazy(() => AuthorUpdateManyWithoutClientNestedInputObjectSchema).optional()
 }).strict();
 export const ClientUpdateWithoutInvoicesInputObjectSchema: z.ZodType<Prisma.ClientUpdateWithoutInvoicesInput> = makeSchema() as unknown as z.ZodType<Prisma.ClientUpdateWithoutInvoicesInput>;
 export const ClientUpdateWithoutInvoicesInputObjectZodSchema = makeSchema();

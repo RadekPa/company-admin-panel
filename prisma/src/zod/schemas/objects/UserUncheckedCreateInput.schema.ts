@@ -12,6 +12,7 @@ const makeSchema = () => z.object({
   passwordHash: z.string(),
   role: RoleSchema.optional(),
   permissions: z.union([NullableJsonNullValueInputSchema, jsonSchema]).optional(),
+  locale: z.string().optional(),
   createdAt: z.coerce.date().optional()
 }).strict();
 export const UserUncheckedCreateInputObjectSchema: z.ZodType<Prisma.UserUncheckedCreateInput> = makeSchema() as unknown as z.ZodType<Prisma.UserUncheckedCreateInput>;

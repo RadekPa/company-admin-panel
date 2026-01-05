@@ -3,15 +3,20 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import Layout from '../components/tailadmin/Layout'
+import { NextIntlClientProvider } from 'next-intl'
+import { getMessages, getLocale } from 'next-intl/server'
 
 export const metadata: Metadata = {
-  title: 'Admin Panel (TailAdmin v2)',
-  description: 'Panel administracyjny z ładnym layoutem, dark mode i mobile drawer',
+  title: 'Aplikacja',
+  description: 'Panel administracyjny aplikacji',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
-    <html lang="pl" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         {/* Ustaw motyw (dark/light) przed hydratacją – spójność SSR/CSR */}
   {/* AdminLTE and FontAwesome CDN removed — using local lucide-react icons and Tailwind for styling */}
@@ -34,7 +39,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <Layout>{children}</Layout>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <Layout>{children}</Layout>
+        </NextIntlClientProvider>
   {/* No external AdminLTE script — UI is implemented using Tailwind + lucide-react */}
       </body>
     </html>

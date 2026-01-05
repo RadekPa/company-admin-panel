@@ -49,6 +49,21 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const body = await req.json()
-  const client = await prisma.client.create({ data: { name: body.name, email: body.email || null, phone: body.phone || null } })
+  const client = await prisma.client.create({ 
+    data: { 
+      name: body.name,
+      email: body.email || null,
+      phone: body.phone || null,
+      address: body.address || null,
+      city: body.city || null,
+      postalCode: body.postalCode || null,
+      country: body.country || null,
+      nip: body.nip || null,
+      regon: body.regon || null,
+      legalForm: body.legalForm || null,
+      bankAccount: body.bankAccount || null,
+      notes: body.notes || null,
+    } 
+  })
   return NextResponse.json(client, { status: 201 })
 }

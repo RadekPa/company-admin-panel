@@ -10,6 +10,7 @@ const makeSchema = () => z.object({
   passwordHash: SortOrderSchema.optional(),
   role: SortOrderSchema.optional(),
   permissions: z.union([SortOrderSchema, z.lazy(() => SortOrderInputObjectSchema)]).optional(),
+  locale: SortOrderSchema.optional(),
   createdAt: SortOrderSchema.optional(),
   updatedAt: SortOrderSchema.optional()
 }).strict();

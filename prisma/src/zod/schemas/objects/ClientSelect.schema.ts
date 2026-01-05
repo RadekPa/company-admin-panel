@@ -2,6 +2,7 @@ import * as z from 'zod';
 import type { Prisma } from '@prisma/client';
 import { DocumentFindManySchema as DocumentFindManySchema } from '../findManyDocument.schema';
 import { InvoiceFindManySchema as InvoiceFindManySchema } from '../findManyInvoice.schema';
+import { AuthorFindManySchema as AuthorFindManySchema } from '../findManyAuthor.schema';
 import { ClientCountOutputTypeArgsObjectSchema as ClientCountOutputTypeArgsObjectSchema } from './ClientCountOutputTypeArgs.schema'
 
 const makeSchema = () => z.object({
@@ -22,6 +23,7 @@ const makeSchema = () => z.object({
   updatedAt: z.boolean().optional(),
   documents: z.union([z.boolean(), z.lazy(() => DocumentFindManySchema)]).optional(),
   invoices: z.union([z.boolean(), z.lazy(() => InvoiceFindManySchema)]).optional(),
+  authors: z.union([z.boolean(), z.lazy(() => AuthorFindManySchema)]).optional(),
   _count: z.union([z.boolean(), z.lazy(() => ClientCountOutputTypeArgsObjectSchema)]).optional()
 }).strict();
 export const ClientSelectObjectSchema: z.ZodType<Prisma.ClientSelect> = makeSchema() as unknown as z.ZodType<Prisma.ClientSelect>;

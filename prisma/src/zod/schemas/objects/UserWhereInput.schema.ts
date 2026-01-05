@@ -18,6 +18,7 @@ const userwhereinputSchema = z.object({
   passwordHash: z.union([z.lazy(() => StringFilterObjectSchema), z.string()]).optional(),
   role: z.union([z.lazy(() => EnumRoleFilterObjectSchema), RoleSchema]).optional(),
   permissions: z.lazy(() => JsonNullableFilterObjectSchema).optional(),
+  locale: z.union([z.lazy(() => StringFilterObjectSchema), z.string()]).optional(),
   createdAt: z.union([z.lazy(() => DateTimeFilterObjectSchema), z.coerce.date()]).optional(),
   updatedAt: z.union([z.lazy(() => DateTimeFilterObjectSchema), z.coerce.date()]).optional()
 }).strict();

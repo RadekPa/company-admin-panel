@@ -5,7 +5,8 @@ import { StringFieldUpdateOperationsInputObjectSchema as StringFieldUpdateOperat
 import { NullableStringFieldUpdateOperationsInputObjectSchema as NullableStringFieldUpdateOperationsInputObjectSchema } from './NullableStringFieldUpdateOperationsInput.schema';
 import { DateTimeFieldUpdateOperationsInputObjectSchema as DateTimeFieldUpdateOperationsInputObjectSchema } from './DateTimeFieldUpdateOperationsInput.schema';
 import { DocumentUncheckedUpdateManyWithoutClientNestedInputObjectSchema as DocumentUncheckedUpdateManyWithoutClientNestedInputObjectSchema } from './DocumentUncheckedUpdateManyWithoutClientNestedInput.schema';
-import { InvoiceUncheckedUpdateManyWithoutClientNestedInputObjectSchema as InvoiceUncheckedUpdateManyWithoutClientNestedInputObjectSchema } from './InvoiceUncheckedUpdateManyWithoutClientNestedInput.schema'
+import { InvoiceUncheckedUpdateManyWithoutClientNestedInputObjectSchema as InvoiceUncheckedUpdateManyWithoutClientNestedInputObjectSchema } from './InvoiceUncheckedUpdateManyWithoutClientNestedInput.schema';
+import { AuthorUncheckedUpdateManyWithoutClientNestedInputObjectSchema as AuthorUncheckedUpdateManyWithoutClientNestedInputObjectSchema } from './AuthorUncheckedUpdateManyWithoutClientNestedInput.schema'
 
 const makeSchema = () => z.object({
   id: z.union([z.number().int(), z.lazy(() => IntFieldUpdateOperationsInputObjectSchema)]).optional(),
@@ -24,7 +25,8 @@ const makeSchema = () => z.object({
   createdAt: z.union([z.coerce.date(), z.lazy(() => DateTimeFieldUpdateOperationsInputObjectSchema)]).optional(),
   updatedAt: z.union([z.coerce.date(), z.lazy(() => DateTimeFieldUpdateOperationsInputObjectSchema)]).optional(),
   documents: z.lazy(() => DocumentUncheckedUpdateManyWithoutClientNestedInputObjectSchema).optional(),
-  invoices: z.lazy(() => InvoiceUncheckedUpdateManyWithoutClientNestedInputObjectSchema).optional()
+  invoices: z.lazy(() => InvoiceUncheckedUpdateManyWithoutClientNestedInputObjectSchema).optional(),
+  authors: z.lazy(() => AuthorUncheckedUpdateManyWithoutClientNestedInputObjectSchema).optional()
 }).strict();
 export const ClientUncheckedUpdateInputObjectSchema: z.ZodType<Prisma.ClientUncheckedUpdateInput> = makeSchema() as unknown as z.ZodType<Prisma.ClientUncheckedUpdateInput>;
 export const ClientUncheckedUpdateInputObjectZodSchema = makeSchema();

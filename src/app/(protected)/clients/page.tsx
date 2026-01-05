@@ -1,12 +1,13 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Card } from '../../../components/ui/Card'
-import { Button } from '../../../components/ui/Button'
-import { Input, Select } from '../../../components/ui/Input'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Table, Th, Td } from '../../../components/ui/Table'
 import { Pagination } from '../../../components/ui/Pagination'
-import { ClientCreateSchema } from '../../../validation/client'
+import { ClientCreateSchema, ClientUpdateSchema } from '../../../validation/client'
+import { useTranslations } from 'next-intl'
 
 type Client = { 
   id: number; 
@@ -30,6 +31,7 @@ type Meta = { page: number; pageSize: number; total: number; pages: number }
 type ListResponse<T> = { data: T[]; meta: Meta }
 
 export default function ClientsPage() {
+  const t = useTranslations()
   const [clients, setClients] = useState<Client[]>([])
   const [meta, setMeta] = useState<Meta>({ page: 1, pageSize: 10, total: 0, pages: 1 })
   const [loading, setLoading] = useState(true)
@@ -219,66 +221,66 @@ export default function ClientsPage() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-semibold">Lista Klientów</h1>
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">{t('clients.title')}</h1>
           <Button variant="primary" onClick={() => { 
             setShowAddModal(true); 
             setFormErrors([]); 
             setLookupMessage(null);
             setForm({ name: '', email: '', phone: '', address: '', city: '', postalCode: '', country: 'Polska', nip: '', regon: '', legalForm: '', bankAccount: '', notes: '' }); 
           }}>
-            Dodaj klienta
+            {t('clients.createClient')}
           </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="label">Szukaj</label>
+            <label className="label">{t('common.search')}</label>
             <Input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Nazwa/Email/Telefon/NIP" />
           </div>
           <div>
-            <label className="label">Sortuj wg</label>
-            <Select value={sortBy} onChange={e=>setSortBy(e.target.value as any)}>
+            <label className="label">{t('common.sortBy')}</label>
+            <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={sortBy} onChange={e=>setSortBy(e.target.value as any)}>
               <option value="id">ID</option>
               <option value="name">Nazwa</option>
               <option value="email">Email</option>
               <option value="phone">Telefon</option>
               <option value="createdAt">Utworzono</option>
-            </Select>
+            </select>
           </div>
           <div>
-            <label className="label">Kierunek</label>
-            <Select value={sortOrder} onChange={e=>setSortOrder(e.target.value as any)}>
-              <option value="asc">Rosnąco</option>
-              <option value="desc">Malejąco</option>
-            </Select>
+            <label className="label">{t('clients.sortDirection')}</label>
+            <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={sortOrder} onChange={e=>setSortOrder(e.target.value as any)}>
+              <option value="asc">{t('clients.ascending')}</option>
+              <option value="desc">{t('clients.descending')}</option>
+            </select>
           </div>
           <div>
-            <label className="label">Rozmiar strony</label>
-            <Select value={String(pageSize)} onChange={e=>setPageSize(Number(e.target.value))}>
+            <label className="label">{t('common.pageSize')}</label>
+            <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={String(pageSize)} onChange={e=>setPageSize(Number(e.target.value))}>
               <option value="5">5</option>
               <option value="10">10</option>
               <option value="20">20</option>
-            </Select>
+            </select>
           </div>
         </div>
       </Card>
 
-      <Card>
+      <Card className="p-6">
         {loading ? (
-          <p>Ładowanie...</p>
+          <p className="text-center text-muted-foreground py-8">{t('common.loading')}</p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <Table>
               <thead>
                 <tr>
                   <Th onClick={()=>toggleSort('id')} active={sortBy==='id'} order={sortOrder}>ID</Th>
-                  <Th onClick={()=>toggleSort('name')} active={sortBy==='name'} order={sortOrder}>Nazwa</Th>
-                  <Th onClick={()=>toggleSort('email')} active={sortBy==='email'} order={sortOrder}>Email</Th>
-                  <Th onClick={()=>toggleSort('phone')} active={sortBy==='phone'} order={sortOrder}>Telefon</Th>
-                  <Th>NIP</Th>
-                  <Th>Miasto</Th>
-                  <Th onClick={()=>toggleSort('createdAt')} active={sortBy==='createdAt'} order={sortOrder}>Utworzono</Th>
+                  <Th onClick={()=>toggleSort('name')} active={sortBy==='name'} order={sortOrder}>{t('common.name')}</Th>
+                  <Th onClick={()=>toggleSort('email')} active={sortBy==='email'} order={sortOrder}>{t('common.email')}</Th>
+                  <Th onClick={()=>toggleSort('phone')} active={sortBy==='phone'} order={sortOrder}>{t('common.phone')}</Th>
+                  <Th>{t('clients.nip')}</Th>
+                  <Th>{t('clients.city')}</Th>
+                  <Th onClick={()=>toggleSort('createdAt')} active={sortBy==='createdAt'} order={sortOrder}>{t('clients.created')}</Th>
                   <th className="px-4 py-2"></th>
                 </tr>
               </thead>
@@ -296,8 +298,8 @@ export default function ClientsPage() {
                     <Td>{new Intl.DateTimeFormat('pl-PL', { timeZone: 'UTC', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).format(new Date(c.createdAt))}</Td>
                     <Td>
                       <div className="flex gap-2">
-                        <Button onClick={()=>openEditClient(c)}>Edytuj</Button>
-                        <Button onClick={()=>removeClient(c.id)}>Usuń</Button>
+                        <Button onClick={()=>openEditClient(c)}>{t('common.edit')}</Button>
+                        <Button onClick={()=>removeClient(c.id)}>{t('common.delete')}</Button>
                       </div>
                     </Td>
                   </tr>
@@ -313,7 +315,7 @@ export default function ClientsPage() {
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto">
           <div className="bg-white dark:bg-gray-800 p-6 rounded shadow w-full max-w-2xl my-8 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold mb-4">Dodaj klienta</h3>
+            <h3 className="text-lg font-semibold mb-4">{t('clients.createClient')}</h3>
             
             {/* Company lookup section */}
             <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded">
@@ -395,8 +397,8 @@ export default function ClientsPage() {
               </ul>
             )}
             <div className="mt-4 flex justify-end gap-2">
-              <Button onClick={() => { setShowAddModal(false); setFormErrors([]); setLookupMessage(null); }}>Anuluj</Button>
-              <Button variant="primary" onClick={addClient}>Dodaj</Button>
+              <Button onClick={() => { setShowAddModal(false); setFormErrors([]); setLookupMessage(null); }}>{t('common.cancel')}</Button>
+              <Button variant="primary" onClick={addClient}>{t('common.add')}</Button>
             </div>
           </div>
         </div>
@@ -406,7 +408,7 @@ export default function ClientsPage() {
       {editingClient && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto">
           <div className="bg-white dark:bg-gray-800 p-6 rounded shadow w-full max-w-2xl my-8 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold mb-4">Edytuj klienta</h3>
+            <h3 className="text-lg font-semibold mb-4">{t('clients.editClient')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="label">Nazwa *</label>
@@ -463,8 +465,8 @@ export default function ClientsPage() {
               </ul>
             )}
             <div className="mt-4 flex justify-end gap-2">
-              <Button onClick={() => { setEditingClient(null); setFormErrors([]); }}>Anuluj</Button>
-              <Button variant="primary" onClick={updateClient}>Zapisz</Button>
+              <Button onClick={() => { setEditingClient(null); setFormErrors([]); }}>{t('common.cancel')}</Button>
+              <Button variant="primary" onClick={updateClient}>{t('common.save')}</Button>
             </div>
           </div>
         </div>

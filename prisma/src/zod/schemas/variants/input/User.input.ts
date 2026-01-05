@@ -8,6 +8,7 @@ export const UserInputSchema = z.object({
     passwordHash: z.string(),
     role: RoleSchema,
     permissions: z.unknown().optional().nullable(),
+    locale: z.string(),
     createdAt: z.date(),
     updatedAt: z.date()
 }).strict();

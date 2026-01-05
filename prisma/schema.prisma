@@ -7,6 +7,7 @@ generator client {
 generator zod {
   provider = "prisma-zod-generator"
   output   = "./src/zod"
+  skipFiles = ["updateManyAndReturn*.schema.ts", "*ScalarRelationFilter.schema.ts"]
 }
 
 datasource db {
@@ -32,6 +33,7 @@ model User {
   passwordHash String
   role         Role     @default(USER)
   permissions  Json?
+  locale       String   @default("pl")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -64,6 +66,22 @@ model Client {
   updatedAt    DateTime   @updatedAt
   documents    Document[]
   invoices     Invoice[]
+  authors      Author[]   // Relacja: jeden klient może mieć wiele osób
+}
+
+model Author {
+  id            Int      @id @default(autoincrement())
+  firstName     String
+  middleName    String?
+  lastName      String
+  description   String?
+  workEmail     String?
+  personalEmail String?
+  photos        Json?
+  clientId      Int?     // Relacja: osoba może być przypisana do jednego klienta
+  client        Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Document {

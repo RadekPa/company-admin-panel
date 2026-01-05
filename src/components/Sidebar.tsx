@@ -1,18 +1,36 @@
 "use client"
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
-import { Menu, Home, Users, FileText, Settings, ChevronDown } from 'lucide-react'
+import { 
+  LayoutDashboard, 
+  Database, 
+  FileText, 
+  Receipt, 
+  Users as UsersIcon, 
+  Shield, 
+  Languages,
+  ChevronDown,
+  UserCircle,
+  Building2,
+  TrendingUp,
+  Menu
+} from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { hasModuleAccess, type RolePermissionsMap, type ModuleKey } from '../lib/permissions'
+import { useTranslations } from 'next-intl'
+import { cn } from '@/lib/utils'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Separator } from '@/components/ui/separator'
 
 type Props = { collapsed?: boolean }
 
 export function Sidebar({ collapsed = false }: Props) {
+  const t = useTranslations()
   const { data: session } = useSession()
   const role = (session as any)?.user?.role as 'USER' | 'ADVANCED' | 'ADMIN' | undefined
   const pathname = usePathname() || ''
-  const [open, setOpen] = useState<{ [k: string]: boolean }>({ clients: false, admin: false })
+  const [open, setOpen] = useState<{ [k: string]: boolean }>({ data: false, admin: false })
   const [permissions, setPermissions] = useState<RolePermissionsMap | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -29,10 +47,14 @@ export function Sidebar({ collapsed = false }: Props) {
         const json = await res.json()
         const permMap: RolePermissionsMap = {
           dashboard: { userAccess: false, advancedAccess: false, adminAccess: true },
+          authors: { userAccess: false, advancedAccess: false, adminAccess: true },
           clients: { userAccess: false, advancedAccess: false, adminAccess: true },
           documents: { userAccess: false, advancedAccess: false, adminAccess: true },
           invoices: { userAccess: false, advancedAccess: false, adminAccess: true },
           cashflow: { userAccess: false, advancedAccess: false, adminAccess: true },
+          users: { userAccess: false, advancedAccess: false, adminAccess: true },
+          permissions: { userAccess: false, advancedAccess: false, adminAccess: true },
+          languages: { userAccess: false, advancedAccess: false, adminAccess: true },
           administration: { userAccess: false, advancedAccess: false, adminAccess: true },
         }
         
@@ -66,92 +88,219 @@ export function Sidebar({ collapsed = false }: Props) {
 
   if (loading) {
     return (
-      <div className={`h-full flex flex-col sidebar ${collapsed ? 'items-center' : ''}`}>
-        <div className={`p-4 border-b w-full ${collapsed ? 'text-center' : ''}`}>
-          <h1 className={`text-lg font-semibold ${collapsed ? 'hidden' : ''} brand`}>Admin Panel</h1>
+      <div className="h-full flex flex-col bg-card border-r">
+        <div className="p-6 border-b">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-6 w-6 text-primary" />
+            <span className="font-bold text-lg">O P I S</span>
+          </div>
         </div>
-        <div className="p-4 text-sm text-gray-400">Ładowanie...</div>
+        <div className="p-4 text-sm text-muted-foreground">{t('common.loading')}</div>
       </div>
     )
   }
 
   return (
-    <div className={`h-full flex flex-col sidebar ${collapsed ? 'items-center' : ''}`}>
-      <div className={`p-4 border-b border-gray-700 w-full ${collapsed ? 'text-center' : ''}`}>
-        <h1 className={`brand ${collapsed ? 'hidden' : ''}`}>AdminLTE 3</h1>
-        {collapsed && <div className="py-2"><Menu className="w-6 h-6 text-white" /></div>}
+    <div className="h-full flex flex-col bg-card border-r">
+      {/* Logo/Brand */}
+      <div className="p-6 border-b">
+        <div className="flex items-center gap-2">
+          <Building2 className="h-6 w-6 text-primary" />
+          <span className="font-bold text-lg">O P I S</span>
+        </div>
       </div>
 
-      <nav className={`flex-1 overflow-y-auto py-4 ${collapsed ? 'px-2' : 'px-0'}`}>
-        {/* Dashboard */}
-        {canAccess('dashboard') && (
-          <Link href="/dashboard" className={`w-full flex items-center gap-3 px-4 py-3 ${pathname === '/dashboard' || pathname === '/' ? 'active' : ''}`}>
-            <Home className="w-5 h-5" /> {!collapsed && <span className="text-sm">Dashboard</span>}
-          </Link>
-        )}
-
-        {/* Clients */}
-        {canAccess('clients') && (
-          <Link href="/clients" className={`w-full flex items-center gap-3 px-4 py-3 ${pathname.startsWith('/clients') ? 'active' : ''}`}>
-            <Users className="w-5 h-5" /> {!collapsed && <span className="text-sm">Klienci</span>}
-          </Link>
-        )}
-
-        {/* Documents */}
-        {canAccess('documents') && (
-          <Link href="/documents" className={`w-full flex items-center gap-3 px-4 py-3 ${pathname.startsWith('/documents') ? 'active' : ''}`}>
-            <FileText className="w-5 h-5" /> {!collapsed && <span className="text-sm">Dokumenty</span>}
-          </Link>
-        )}
-
-        {/* Invoices */}
-        {canAccess('invoices') && (
-          <Link href="/invoices" className={`w-full flex items-center gap-3 px-4 py-3 ${pathname.startsWith('/invoices') && !pathname.startsWith('/invoices/calendar') ? 'active' : ''}`}>
-            <FileText className="w-5 h-5" /> {!collapsed && <span className="text-sm">Faktury</span>}
-          </Link>
-        )}
-
-        {/* Cashflow */}
-        {canAccess('cashflow') && (
-          <Link href="/invoices/calendar" className={`w-full flex items-center gap-3 px-4 py-3 ${pathname.startsWith('/invoices/calendar') ? 'active' : ''}`}>
-            <FileText className="w-5 h-5" /> {!collapsed && <span className="text-sm">Cashflow</span>}
-          </Link>
-        )}
-
-        {/* Admin group */}
-        {canAccess('administration') && (
-          <div>
-            <button 
-              onClick={()=>toggle('admin')} 
-              className={`w-full flex items-center justify-between px-4 py-3 ${pathname.startsWith('/users') || pathname.startsWith('/permissions') ? 'active' : ''} ${collapsed ? 'justify-center' : ''}`}
+      <ScrollArea className="flex-1 py-4">
+        <nav className="space-y-1 px-3">
+          {/* Dashboard */}
+          {canAccess('dashboard') && (
+            <Link 
+              href="/dashboard" 
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                pathname === '/dashboard' || pathname === '/' 
+                  ? "bg-primary text-primary-foreground" 
+                  : "hover:bg-accent hover:text-accent-foreground"
+              )}
             >
-              <div className="flex items-center gap-3">
-                <Settings className="w-5 h-5" />
-                {!collapsed && <span className="text-sm">Administracja</span>}
+              <LayoutDashboard className="h-4 w-4" />
+              <span>{t('navigation.dashboard')}</span>
+            </Link>
+          )}
+
+          {/* Data group */}
+          {(canAccess('authors') || canAccess('clients')) && (
+            <div className="space-y-1">
+              <button 
+                onClick={() => toggle('data')} 
+                className={cn(
+                  "w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  (pathname.startsWith('/clients') || pathname.startsWith('/authors'))
+                    ? "bg-accent text-accent-foreground" 
+                    : "hover:bg-accent hover:text-accent-foreground"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <Database className="h-4 w-4" />
+                  <span>{t('navigation.clients')}</span>
+                </div>
+                <ChevronDown className={cn("h-4 w-4 transition-transform", open.data && "rotate-180")} />
+              </button>
+              <div className={cn(
+                "overflow-hidden transition-all duration-200 space-y-1",
+                open.data ? "max-h-40 mt-1" : "max-h-0"
+              )}>
+                {canAccess('authors') && (
+                  <Link 
+                    href="/authors" 
+                    className={cn(
+                      "flex items-center gap-3 pl-10 pr-3 py-2 rounded-md text-sm transition-colors",
+                      pathname.startsWith('/authors')
+                        ? "bg-primary/10 text-primary font-medium" 
+                        : "hover:bg-accent hover:text-accent-foreground"
+                    )}
+                  >
+                    <UserCircle className="h-3.5 w-3.5" />
+                    <span>{t('navigation.authors')}</span>
+                  </Link>
+                )}
+                {canAccess('clients') && (
+                  <Link 
+                    href="/clients" 
+                    className={cn(
+                      "flex items-center gap-3 pl-10 pr-3 py-2 rounded-md text-sm transition-colors",
+                      pathname.startsWith('/clients')
+                        ? "bg-primary/10 text-primary font-medium" 
+                        : "hover:bg-accent hover:text-accent-foreground"
+                    )}
+                  >
+                    <Building2 className="h-3.5 w-3.5" />
+                    <span>{t('clients.title')}</span>
+                  </Link>
+                )}
               </div>
-              {!collapsed && <ChevronDown className={`w-4 h-4 transition-transform ${open.admin ? 'rotate-180' : ''}`} />}
-            </button>
-            {!collapsed && (
-              <div className={`overflow-hidden transition-all duration-200 ${open.admin ? 'max-h-40' : 'max-h-0'}`}>
-                <Link 
-                  href="/users" 
-                  className={`submenu-item flex items-center gap-3 pl-12 pr-4 py-2 text-sm ${pathname.startsWith('/users') ? 'active' : ''}`}
-                >
-                  <span>•</span>
-                  <span>Użytkownicy</span>
-                </Link>
-                <Link 
-                  href="/permissions" 
-                  className={`submenu-item flex items-center gap-3 pl-12 pr-4 py-2 text-sm ${pathname.startsWith('/permissions') ? 'active' : ''}`}
-                >
-                  <span>•</span>
-                  <span>Uprawnienia</span>
-                </Link>
+            </div>
+          )}
+
+          {/* Documents */}
+          {canAccess('documents') && (
+            <Link 
+              href="/documents" 
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                pathname.startsWith('/documents')
+                  ? "bg-primary text-primary-foreground" 
+                  : "hover:bg-accent hover:text-accent-foreground"
+              )}
+            >
+              <FileText className="h-4 w-4" />
+              <span>{t('navigation.documents')}</span>
+            </Link>
+          )}
+
+          {/* Invoices */}
+          {canAccess('invoices') && (
+            <Link 
+              href="/invoices" 
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                pathname.startsWith('/invoices') && !pathname.startsWith('/invoices/calendar')
+                  ? "bg-primary text-primary-foreground" 
+                  : "hover:bg-accent hover:text-accent-foreground"
+              )}
+            >
+              <Receipt className="h-4 w-4" />
+              <span>{t('navigation.invoices')}</span>
+            </Link>
+          )}
+
+          {/* Cashflow */}
+          {canAccess('cashflow') && (
+            <Link 
+              href="/invoices/calendar" 
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                pathname.startsWith('/invoices/calendar')
+                  ? "bg-primary text-primary-foreground" 
+                  : "hover:bg-accent hover:text-accent-foreground"
+              )}
+            >
+              <TrendingUp className="h-4 w-4" />
+              <span>Cashflow</span>
+            </Link>
+          )}
+
+          <Separator className="my-2" />
+
+          {/* Admin group */}
+          {(canAccess('users') || canAccess('permissions') || canAccess('languages')) && (
+            <div className="space-y-1">
+              <button 
+                onClick={() => toggle('admin')} 
+                className={cn(
+                  "w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  (pathname.startsWith('/users') || pathname.startsWith('/permissions') || pathname.startsWith('/languages'))
+                    ? "bg-accent text-accent-foreground" 
+                    : "hover:bg-accent hover:text-accent-foreground"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <Shield className="h-4 w-4" />
+                  <span>{t('navigation.administration')}</span>
+                </div>
+                <ChevronDown className={cn("h-4 w-4 transition-transform", open.admin && "rotate-180")} />
+              </button>
+              <div className={cn(
+                "overflow-hidden transition-all duration-200 space-y-1",
+                open.admin ? "max-h-40 mt-1" : "max-h-0"
+              )}>
+                {canAccess('users') && (
+                  <Link 
+                    href="/users" 
+                    className={cn(
+                      "flex items-center gap-3 pl-10 pr-3 py-2 rounded-md text-sm transition-colors",
+                      pathname.startsWith('/users')
+                        ? "bg-primary/10 text-primary font-medium" 
+                        : "hover:bg-accent hover:text-accent-foreground"
+                    )}
+                  >
+                    <UsersIcon className="h-3.5 w-3.5" />
+                    <span>{t('navigation.users')}</span>
+                  </Link>
+                )}
+                {canAccess('permissions') && (
+                  <Link 
+                    href="/permissions" 
+                    className={cn(
+                      "flex items-center gap-3 pl-10 pr-3 py-2 rounded-md text-sm transition-colors",
+                      pathname.startsWith('/permissions')
+                        ? "bg-primary/10 text-primary font-medium" 
+                        : "hover:bg-accent hover:text-accent-foreground"
+                    )}
+                  >
+                    <Shield className="h-3.5 w-3.5" />
+                    <span>{t('permissions.title')}</span>
+                  </Link>
+                )}
+                {canAccess('languages') && (
+                  <Link 
+                    href="/languages" 
+                    className={cn(
+                      "flex items-center gap-3 pl-10 pr-3 py-2 rounded-md text-sm transition-colors",
+                      pathname.startsWith('/languages')
+                        ? "bg-primary/10 text-primary font-medium" 
+                        : "hover:bg-accent hover:text-accent-foreground"
+                    )}
+                  >
+                    <Languages className="h-3.5 w-3.5" />
+                    <span>{t('navigation.languages')}</span>
+                  </Link>
+                )}
               </div>
-            )}
-          </div>
-        )}
-      </nav>
+            </div>
+          )}
+        </nav>
+      </ScrollArea>
     </div>
   )
 }

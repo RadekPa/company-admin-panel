@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from 'react'
-import { Card } from '../../../components/ui/Card'
+import { Card } from '@/components/ui/card'
 import { Table, Th, Td } from '../../../components/ui/Table'
 
 type Document = { id: number; title: string; description?: string | null; status?: string }
@@ -29,10 +29,10 @@ export default function DocumentsPage(){
 
   return (
     <div className="space-y-6">
-      <Card>
-        <h1 className="text-xl font-semibold mb-4">Dokumenty</h1>
-        {loading ? <p>Ładowanie...</p> : (
-          error ? <p className="text-red-600">{error}</p> : (
+      <Card className="p-6">
+        <h1 className="text-2xl font-bold mb-6">Dokumenty</h1>
+        {loading ? <p className="text-center text-muted-foreground py-8">Ładowanie...</p> : (
+          error ? <p className="text-red-600 text-center py-4">{error}</p> : (
             <Table>
               <thead>
                 <tr>

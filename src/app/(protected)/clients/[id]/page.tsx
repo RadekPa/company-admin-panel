@@ -2,9 +2,9 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { Card } from '../../../../components/ui/Card'
-import { Button } from '../../../../components/ui/Button'
-import { Input, Select } from '../../../../components/ui/Input'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Table, Th, Td } from '../../../../components/ui/Table'
 import { Pagination } from '../../../../components/ui/Pagination'
 import { ClientUpdateSchema } from '../../../../validation/client'
@@ -30,6 +30,16 @@ type Client = {
 
 type Document = { id: number; title: string; description?: string | null; status: 'DRAFT' | 'SIGNED'; createdAt: string }
 
+type Author = { 
+  id: number
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  workEmail?: string | null
+  personalEmail?: string | null
+  description?: string | null
+}
+
 type Meta = { page: number; pageSize: number; total: number; pages: number }
 
 type ListResponse<T> = { data: T[]; meta: Meta }
@@ -38,7 +48,7 @@ export default function ClientDetailPage() {
   const params = useParams()
   const id = Number(params.id)
   const [client, setClient] = useState<Client | null>(null)
-  const [activeTab, setActiveTab] = useState<'documents' | 'invoices'>('documents')
+  const [activeTab, setActiveTab] = useState<'documents' | 'invoices' | 'authors'>('documents')
 
   const [docs, setDocs] = useState<Document[]>([])
   const [meta, setMeta] = useState<Meta>({ page: 1, pageSize: 10, total: 0, pages: 1 })
@@ -57,12 +67,91 @@ export default function ClientDetailPage() {
   // invoices
   const [invoicesType, setInvoicesType] = useState<'issued'|'planned'>('issued')
   const [invoices, setInvoices] = useState<any[]>([])
+  
+  // authors
+  const [authors, setAuthors] = useState<Author[]>([])
+  const [availableAuthors, setAvailableAuthors] = useState<Author[]>([])
+  const [filteredAuthors, setFilteredAuthors] = useState<Author[]>([])
+  const [selectedAuthorId, setSelectedAuthorId] = useState<number | null>(null)
+  const [authorSearchQuery, setAuthorSearchQuery] = useState('')
+  const [authorsLoading, setAuthorsLoading] = useState(false)
+  
   const loadInvoices = async (type: 'issued'|'planned' = invoicesType) => {
     const res = await fetch(`/api/clients/${id}/invoices?type=${type}`)
     if (!res.ok) { setInvoices([]); return }
     const json = await res.json()
     setInvoices(Array.isArray(json?.data) ? json.data : (json?.data ?? []))
   }
+  
+  const loadAuthors = async () => {
+    setAuthorsLoading(true)
+    try {
+      const res = await fetch(`/api/clients/${id}/authors`)
+      if (res.ok) {
+        const json = await res.json()
+        setAuthors(Array.isArray(json?.data) ? json.data : [])
+      }
+    } finally {
+      setAuthorsLoading(false)
+    }
+  }
+  
+  const loadAvailableAuthors = async () => {
+    try {
+      const res = await fetch('/api/authors?pageSize=1000')
+      if (res.ok) {
+        const json = await res.json()
+        const allAuthors = Array.isArray(json?.data) ? json.data : []
+        // Pokaż tylko osoby, które nie są przypisane do żadnego klienta
+        setAvailableAuthors(allAuthors.filter((a: any) => !a.client))
+      }
+    } catch (error) {
+      console.error('Error loading available authors:', error)
+    }
+  }
+  
+  const assignAuthor = async () => {
+    if (!selectedAuthorId) return
+    
+    try {
+      const res = await fetch(`/api/clients/${id}/authors`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ authorId: selectedAuthorId })
+      })
+      
+      if (res.ok) {
+        await loadAuthors()
+        await loadAvailableAuthors()
+        setSelectedAuthorId(null)
+        setAuthorSearchQuery('')
+      } else {
+        const error = await res.json()
+        alert(error.error || 'Nie udało się przypisać osoby')
+      }
+    } catch (error) {
+      console.error('Error assigning author:', error)
+      alert('Wystąpił błąd podczas przypisywania osoby')
+    }
+  }
+  
+  const unassignAuthor = async (authorId: number) => {
+    if (!confirm('Czy na pewno chcesz odpiąć tę osobę od klienta?')) return
+    
+    try {
+      const res = await fetch(`/api/clients/${id}/authors?authorId=${authorId}`, {
+        method: 'DELETE'
+      })
+      
+      if (res.ok) {
+        await loadAuthors()
+        await loadAvailableAuthors()
+      }
+    } catch (error) {
+      console.error('Error unassigning author:', error)
+    }
+  }
+
 
   const loadClient = async () => {
     const resClient = await fetch(`/api/clients/${id}`)
@@ -98,9 +187,24 @@ export default function ClientDetailPage() {
     setLoading(false)
   }
 
-  useEffect(() => { if (id) { loadClient(); loadDocs(1) } }, [id])
+  useEffect(() => { if (id) { loadClient(); loadDocs(1); loadAuthors(); loadAvailableAuthors() } }, [id])
   useEffect(()=>{ if (id) loadInvoices(invoicesType) }, [id, invoicesType])
   useEffect(() => { loadDocs(1) }, [search, status, sortBy, sortOrder, pageSize])
+  
+  // Filtruj dostępne osoby na podstawie wyszukiwania
+  useEffect(() => {
+    if (!authorSearchQuery.trim()) {
+      setFilteredAuthors(availableAuthors)
+    } else {
+      const query = authorSearchQuery.toLowerCase()
+      const filtered = availableAuthors.filter(author => {
+        const fullName = `${author.firstName} ${author.middleName || ''} ${author.lastName}`.toLowerCase()
+        const email = `${author.workEmail || ''} ${author.personalEmail || ''}`.toLowerCase()
+        return fullName.includes(query) || email.includes(query)
+      })
+      setFilteredAuthors(filtered)
+    }
+  }, [authorSearchQuery, availableAuthors])
 
   const addDoc = async () => {
     const parsed = DocumentCreateSchema.safeParse(formDoc)
@@ -149,14 +253,14 @@ export default function ClientDetailPage() {
     if (sortBy !== col) { setSortBy(col); setSortOrder('asc') } else { setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc') }
   }
 
-  if (!client) return <p>Ładowanie...</p>
+  if (!client) return <p className="text-center text-muted-foreground py-8">Ładowanie...</p>
 
   return (
     <div className="space-y-6">
       {/* Client Details Card - Read Only */}
-      <Card>
+      <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Szczegóły klienta</h1>
+          <h1 className="text-2xl font-bold">Szczegóły klienta</h1>
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => window.history.back()}>
               Powrót
@@ -291,7 +395,7 @@ export default function ClientDetailPage() {
               {editMode ? (
                 <Input value={client.bankAccount ?? ''} onChange={e => setClient({ ...client, bankAccount: e.target.value })} />
               ) : (
-                <p className="text-base font-mono text-sm">{client.bankAccount || '-'}</p>
+                <p className="text-sm font-mono">{client.bankAccount || '-'}</p>
               )}
             </div>
           </div>
@@ -329,8 +433,8 @@ export default function ClientDetailPage() {
       </Card>
 
       {/* Tabs */}
-      <Card>
-        <div className="border-b border-gray-200 dark:border-gray-700">
+      <Card className="p-6">
+        <div className="border-b border-gray-200 dark:border-gray-700 -mx-6 px-6">
           <nav className="flex -mb-px">
             <button
               onClick={() => setActiveTab('documents')}
@@ -352,6 +456,16 @@ export default function ClientDetailPage() {
             >
               Faktury
             </button>
+            <button
+              onClick={() => setActiveTab('authors')}
+              className={`px-6 py-3 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'authors'
+                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+              }`}
+            >
+              Osoby
+            </button>
           </nav>
         </div>
 
@@ -367,27 +481,27 @@ export default function ClientDetailPage() {
                 </div>
                 <div>
                   <label className="label">Status</label>
-                  <Select value={status} onChange={e => setStatus(e.target.value as any)}>
+                  <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={status} onChange={e => setStatus(e.target.value as any)}>
                     <option value="">Wszystkie</option>
                     <option value="DRAFT">DRAFT</option>
                     <option value="SIGNED">SIGNED</option>
-                  </Select>
+                  </select>
                 </div>
                 <div>
                   <label className="label">Sortuj wg</label>
-                  <Select value={sortBy} onChange={e => setSortBy(e.target.value as any)}>
+                  <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={sortBy} onChange={e => setSortBy(e.target.value as any)}>
                     <option value="createdAt">Utworzono</option>
                     <option value="title">Tytuł</option>
                     <option value="status">Status</option>
                     <option value="id">ID</option>
-                  </Select>
+                  </select>
                 </div>
                 <div>
                   <label className="label">Kierunek</label>
-                  <Select value={sortOrder} onChange={e => setSortOrder(e.target.value as any)}>
+                  <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={sortOrder} onChange={e => setSortOrder(e.target.value as any)}>
                     <option value="asc">Rosnąco</option>
                     <option value="desc">Malejąco</option>
-                  </Select>
+                  </select>
                 </div>
               </div>
 
@@ -402,10 +516,10 @@ export default function ClientDetailPage() {
                 </div>
                 <div>
                   <label className="label">Status</label>
-                  <Select value={formDoc.status} onChange={e => setFormDoc(prev => ({ ...prev, status: e.target.value as any }))}>
+                  <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={formDoc.status} onChange={e => setFormDoc(prev => ({ ...prev, status: e.target.value as any }))}>
                     <option value="DRAFT">DRAFT</option>
                     <option value="SIGNED">SIGNED</option>
-                  </Select>
+                  </select>
                 </div>
               </div>
               {formDocErrors.length > 0 && (
@@ -504,6 +618,115 @@ export default function ClientDetailPage() {
                   </tbody>
                 </Table>
               </div>
+            </div>
+          )}
+          
+          {activeTab === 'authors' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Osoby przypisane do klienta</h2>
+              </div>
+              
+              {/* Formularz przypisywania osoby */}
+              <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg space-y-3">
+                <h3 className="font-medium text-sm">Przypisz osobę do klienta</h3>
+                
+                {availableAuthors.length > 0 ? (
+                  <>
+                    <Input 
+                      placeholder="Szukaj osoby po imieniu, nazwisku lub emailu..."
+                      value={authorSearchQuery}
+                      onChange={e => setAuthorSearchQuery(e.target.value)}
+                    />
+                    
+                    <div className="flex gap-3">
+                      {filteredAuthors.length > 0 ? (
+                        <>
+                          <select 
+                            className="input flex-1"
+                            value={selectedAuthorId ?? ''}
+                            onChange={e => setSelectedAuthorId(e.target.value ? Number(e.target.value) : null)}
+                          >
+                            <option value="">Wybierz osobę...</option>
+                            {filteredAuthors.map(author => (
+                              <option key={author.id} value={author.id}>
+                                {author.firstName} {author.middleName ? author.middleName + ' ' : ''}{author.lastName}
+                                {author.workEmail ? ` (${author.workEmail})` : ''}
+                              </option>
+                            ))}
+                          </select>
+                          <Button 
+                            variant="primary" 
+                            onClick={assignAuthor}
+                            disabled={!selectedAuthorId}
+                          >
+                            Przypisz
+                          </Button>
+                        </>
+                      ) : (
+                        <p className="text-sm text-muted-foreground w-full">
+                          Nie znaleziono osób pasujących do "{authorSearchQuery}"
+                        </p>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Wszystkie osoby są już przypisane do klientów. 
+                    <Link href="/authors" className="text-primary-600 hover:underline ml-1">
+                      Dodaj nową osobę
+                    </Link>
+                  </p>
+                )}
+              </div>
+              
+              {/* Lista przypisanych osób */}
+              {authorsLoading ? (
+                <p className="text-center text-muted-foreground py-8">Ładowanie...</p>
+              ) : authors.length === 0 ? (
+                <div className="text-center py-12 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
+                  <p className="text-muted-foreground">Brak przypisanych osób</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Użyj formularza powyżej, aby przypisać osobę do tego klienta
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {authors.map(author => (
+                    <div 
+                      key={author.id}
+                      className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-accent/50 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <Link 
+                          href={`/authors/${author.id}`}
+                          className="font-medium text-primary-600 hover:underline"
+                        >
+                          {author.firstName} {author.middleName ? author.middleName + ' ' : ''}{author.lastName}
+                        </Link>
+                        <div className="text-sm text-muted-foreground mt-1 space-y-0.5">
+                          {author.workEmail && (
+                            <div>Email (służbowy): {author.workEmail}</div>
+                          )}
+                          {author.personalEmail && (
+                            <div>Email (prywatny): {author.personalEmail}</div>
+                          )}
+                          {author.description && (
+                            <div className="mt-2 text-xs">{author.description}</div>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        variant="destructive"
+                        onClick={() => unassignAuthor(author.id)}
+                        className="ml-4"
+                      >
+                        Odepnij
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

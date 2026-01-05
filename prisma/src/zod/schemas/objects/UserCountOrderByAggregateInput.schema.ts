@@ -9,6 +9,7 @@ const makeSchema = () => z.object({
   passwordHash: SortOrderSchema.optional(),
   role: SortOrderSchema.optional(),
   permissions: SortOrderSchema.optional(),
+  locale: SortOrderSchema.optional(),
   createdAt: SortOrderSchema.optional(),
   updatedAt: SortOrderSchema.optional()
 }).strict();

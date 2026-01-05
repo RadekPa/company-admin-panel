@@ -1,11 +1,11 @@
 "use client"
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Card } from '../../../components/ui/Card'
+import { Card } from '@/components/ui/card'
 import { Table, Th, Td } from '../../../components/ui/Table'
 import { Pagination } from '../../../components/ui/Pagination'
 import { Modal } from '../../../components/ui/Modal'
-import { Button } from '../../../components/ui/Button'
+import { Button } from '@/components/ui/button'
 type Invoice = { id:number; clientId:number; clientName:string; issueDate:string; paymentDate:string; title:string; net:number; vatPerc:number; vat:number; gross:number; status:string }
 
 type Client = { id:number; name:string }
@@ -71,9 +71,9 @@ export default function InvoicesPage(){
 
   return (
     <div className="space-y-6">
-      <Card>
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold mb-4">Faktury - lista</h1>
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Faktury - lista</h1>
           <Button variant="primary" onClick={()=>setShowForm(true)}>Nowa faktura</Button>
         </div>
 
@@ -167,8 +167,8 @@ export default function InvoicesPage(){
           </form>
         </Modal>
 
-        {loading ? <p>Ładowanie...</p> : (
-          <>
+        {loading ? <p className="text-center text-muted-foreground py-8">Ładowanie...</p> : (
+          <div className="mt-6">
             <Table>
               <thead>
                 <tr>
@@ -200,10 +200,10 @@ export default function InvoicesPage(){
                 ))}
               </tbody>
             </Table>
-            <div className="mt-4">
+            <div className="mt-6">
               <Pagination page={meta.page} pages={meta.pages} onPage={(p)=>load(p)} />
             </div>
-          </>
+          </div>
         )}
       </Card>
     </div>

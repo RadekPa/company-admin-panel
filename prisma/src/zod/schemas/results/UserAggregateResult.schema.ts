@@ -6,6 +6,7 @@ export const UserAggregateResultSchema = z.object({  _count: z.object({
     passwordHash: z.number(),
     role: z.number(),
     permissions: z.number(),
+    locale: z.number(),
     createdAt: z.number(),
     updatedAt: z.number()
   }).optional(),
@@ -20,6 +21,7 @@ export const UserAggregateResultSchema = z.object({  _count: z.object({
     name: z.string().nullable(),
     email: z.string().nullable(),
     passwordHash: z.string().nullable(),
+    locale: z.string().nullable(),
     createdAt: z.date().nullable(),
     updatedAt: z.date().nullable()
   }).nullable().optional(),
@@ -28,6 +30,7 @@ export const UserAggregateResultSchema = z.object({  _count: z.object({
     name: z.string().nullable(),
     email: z.string().nullable(),
     passwordHash: z.string().nullable(),
+    locale: z.string().nullable(),
     createdAt: z.date().nullable(),
     updatedAt: z.date().nullable()
   }).nullable().optional()});

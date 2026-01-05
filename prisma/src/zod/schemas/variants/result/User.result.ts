@@ -8,6 +8,7 @@ export const UserResultSchema = z.object({
     passwordHash: z.string(),
     role: RoleSchema,
     permissions: z.unknown().nullable(),
+    locale: z.string(),
     createdAt: z.date(),
     updatedAt: z.date()
 }).strict();

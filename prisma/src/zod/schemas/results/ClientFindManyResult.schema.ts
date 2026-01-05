@@ -17,7 +17,8 @@ export const ClientFindManyResultSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
   documents: z.array(z.unknown()),
-  invoices: z.array(z.unknown())
+  invoices: z.array(z.unknown()),
+  authors: z.array(z.unknown())
 })),
   pagination: z.object({
   page: z.number().int().min(1),

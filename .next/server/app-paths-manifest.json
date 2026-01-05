@@ -1,15 +1,8 @@
 {
-  "/api/clients/route": "app/api/clients/route.js",
-  "/api/permissions/route": "app/api/permissions/route.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/api/clients/[id]/route": "app/api/clients/[id]/route.js",
-  "/api/clients/[id]/documents/route": "app/api/clients/[id]/documents/route.js",
-  "/api/clients/[id]/invoices/route": "app/api/clients/[id]/invoices/route.js",
-  "/api/documents/route": "app/api/documents/route.js",
-  "/(protected)/clients/page": "app/(protected)/clients/page.js",
-  "/(protected)/invoices/calendar/page": "app/(protected)/invoices/calendar/page.js",
-  "/(protected)/invoices/page": "app/(protected)/invoices/page.js",
+  "/api/authors/route": "app/api/authors/route.js",
+  "/api/permissions/route": "app/api/permissions/route.js",
   "/(protected)/clients/[id]/page": "app/(protected)/clients/[id]/page.js",
-  "/(protected)/permissions/page": "app/(protected)/permissions/page.js",
-  "/(protected)/documents/page": "app/(protected)/documents/page.js"
+  "/(protected)/authors/page": "app/(protected)/authors/page.js",
+  "/(protected)/dashboard/page": "app/(protected)/dashboard/page.js"
 }
